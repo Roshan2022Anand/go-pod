@@ -1,3 +1,3 @@
-module github.com/Roshan2022Anand/go-pod
+module server
 
-go 1.24.2
+go 1.21
