@@ -1,6 +1,9 @@
-import type { Socket } from "socket.io-client";
-
+import type { Dispatch, SetStateAction } from "react";
 export interface ContextType {
-  socket: Socket | null;
-  setSocket: (socket: Socket | null) => void;
+  connectSocket: () => void;
+  sendMsg: () => void;
+  socket: WebSocket | null;
+  setSocket: Dispatch<SetStateAction<WebSocket | null>>;
+  isSocketReady: boolean;
+  setIsSocketReady: Dispatch<SetStateAction<boolean>>;
 }

@@ -1,14 +1,22 @@
-import { useContext } from "react";
-import connectSocket from "./configs/socket";
-import { MyContext } from "./utils/Mycontext";
+import { useMyContext } from "./utils/Mycontext";
 
 const App = () => {
-  //to connect to the socket server
-  const { setSocket } = useContext(MyContext);
-  const socket = connectSocket();
-  setSocket(socket);
-
-  return <div>App</div>;
+  const { isSocketReady, sendMsg, connectSocket } = useMyContext();
+  connectSocket();
+  return (
+    <>
+      <button
+        className="text-[20px] bg-green-300 rounded-lg disabled:bg-gray-300"
+        onClick={sendMsg}
+        disabled={!isSocketReady}
+      >
+        {isSocketReady ? "Create Room" : "Connecting..."}
+      </button>
+      <div className="text-sm mt-2">
+        Status: {isSocketReady ? "🟢 Connected" : "🔴 Connecting"}
+      </div>
+    </>
+  );
 };
 
 export default App;

@@ -18,7 +18,7 @@ import (
 
 type Client struct {
 	hub  *Hub
-	conn websocket.Conn
+	conn *websocket.Conn
 	send chan []byte
 }
 
@@ -49,6 +49,8 @@ func (c *Client) readPump() {
 
 		switch events["event"] {
 		case "create:room":
+			fmt.Println(events["msg"])
+		default:
 			fmt.Println(events)
 		}
 	}
@@ -67,7 +69,7 @@ func ServeWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		return
 	}
-	client := &Client{hub: hub, conn: *conn, send: make(chan []byte, 256)}
+	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256)}
 	client.hub.register <- client
 
 	// go client.writePump()
