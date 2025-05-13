@@ -60,9 +60,11 @@ func (c *Client) readPump() {
 		//run func based on events
 		switch ev["event"] {
 		case "create:room":
-			createRoom(c, data)
+			c.hub.createRoom(c, data)
+		case "join:room":
+			c.hub.joinRoom(c, data)
 		default:
-			fmt.Println("other ev", ev)
+			fmt.Println("other ev", ev["event"])
 		}
 	}
 }
