@@ -1,22 +1,17 @@
-import { useMyContext } from "./utils/Mycontext";
+import { useMyContext } from "./utils/context/Mycontext";
+import { RouterProvider } from "@tanstack/react-router";
+import router from "./utils/Routers.tsx";
+
+declare module "@tanstack/react-router" {
+  interface Register {
+    router: typeof router;
+  }
+}
 
 const App = () => {
-  const { isSocketReady, sendMsg, connectSocket } = useMyContext();
+  const { connectSocket } = useMyContext();
   connectSocket();
-  return (
-    <>
-      <button
-        className="text-[20px] bg-green-300 rounded-lg disabled:bg-gray-300"
-        onClick={sendMsg}
-        disabled={!isSocketReady}
-      >
-        {isSocketReady ? "Create Room" : "Connecting..."}
-      </button>
-      <div className="text-sm mt-2">
-        Status: {isSocketReady ? "🟢 Connected" : "🔴 Connecting"}
-      </div>
-    </>
-  );
+  return <RouterProvider router={router} />;
 };
 
 export default App;

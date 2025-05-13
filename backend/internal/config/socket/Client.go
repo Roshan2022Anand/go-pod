@@ -22,6 +22,7 @@ type Client struct {
 	send chan []byte
 }
 
+// to read the msg from the client
 func (c *Client) readPump() {
 	defer func() {
 		c.hub.unregister <- c
@@ -33,6 +34,7 @@ func (c *Client) readPump() {
 	// c.conn.SetPongHandler(func(string) error { c.conn.SetReadDeadline(time.Now().Add(pongWait)); return nil })
 
 	for {
+		//reading the msg from client
 		_, msg, err := c.conn.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
@@ -41,21 +43,58 @@ func (c *Client) readPump() {
 			break
 		}
 
-		var events map[string]interface{}
-		if err := json.Unmarshal(msg, &events); err != nil {
-			log.Fatal("err while unmarshaling event:", err)
+		//convert to map
+		var ev map[string]interface{}
+		if err := json.Unmarshal(msg, &ev); err != nil {
+			log.Println("err while unmarshaling event:", err)
 			continue
 		}
 
-		switch events["event"] {
+		//extract the data from ev
+		data, err := json.Marshal(ev["data"])
+		if err != nil {
+			log.Println("err while marshaling event data:", err)
+			continue
+		}
+
+		//run func based on events
+		switch ev["event"] {
 		case "create:room":
-			fmt.Println(events["msg"])
+			createRoom(c, data)
 		default:
-			fmt.Println(events)
+			fmt.Println("other ev", ev)
 		}
 	}
 }
 
+// to write the msg to the client
+func (c *Client) writePump() {
+	defer func() {
+		c.conn.Close()
+	}()
+
+	for {
+		select {
+		case msg, ok := <-c.send:
+			if !ok {
+				c.conn.WriteMessage(websocket.CloseMessage, []byte{})
+				return
+			}
+
+			w, err := c.conn.NextWriter(websocket.TextMessage)
+			if err != nil {
+				return
+			}
+			w.Write(msg)
+
+			if err := w.Close(); err != nil {
+				return
+			}
+		}
+	}
+}
+
+// upgrader for upgrading http to ws
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
 		return true
@@ -72,6 +111,6 @@ func ServeWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256)}
 	client.hub.register <- client
 
-	// go client.writePump()
+	go client.writePump()
 	go client.readPump()
 }
