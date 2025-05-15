@@ -7,9 +7,9 @@ const Landing = () => {
     <>
       <button
         className="text-[20px] rounded-md bg-green-300"
-        onClick={() => navigate({ to: "/room" })}
+        onClick={() => navigate({ to: "/studio" })}
       >
-        create room
+        home
       </button>
     </>
   );

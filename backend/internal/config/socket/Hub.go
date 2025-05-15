@@ -1,6 +1,9 @@
 package socket
 
-import "sync"
+import (
+	"fmt"
+	"sync"
+)
 
 type Room struct {
 	Clients map[*Client]bool
@@ -30,6 +33,7 @@ func (h *Hub) Run() {
 		case client := <-h.register:
 			h.mu.Lock()
 			h.clients[client] = true
+			fmt.Println("client registered", client.conn.RemoteAddr())
 			h.mu.Unlock()
 		case client := <-h.unregister:
 			h.mu.Lock()
@@ -37,6 +41,7 @@ func (h *Hub) Run() {
 				delete(h.clients, client)
 				close(client.send)
 			}
+			fmt.Println("client unregistered", client.conn.RemoteAddr())
 			h.mu.Unlock()
 		}
 	}

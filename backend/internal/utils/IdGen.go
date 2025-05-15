@@ -3,7 +3,7 @@ package utils
 import "math/rand"
 
 func GenerateID(l int) string {
-	aChar := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*<>"
+	aChar := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-@&$#"
 
 	var id string
 

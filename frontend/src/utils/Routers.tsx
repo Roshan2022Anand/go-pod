@@ -3,7 +3,7 @@ import {
   createRoute,
   createRootRoute,
 } from "@tanstack/react-router";
-import Room from "../pages/Room";
+import Room from "../pages/Studio";
 import Landing from "../pages/Landing";
 
 const rootRoute = createRootRoute();
@@ -16,7 +16,7 @@ const indexRoute = createRoute({
 
 const roomRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/room",
+  path: "/studio",
   component: () => <Room />,
 });
 

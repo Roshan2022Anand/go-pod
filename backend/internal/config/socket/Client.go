@@ -20,6 +20,11 @@ type Client struct {
 	hub  *Hub
 	conn *websocket.Conn
 	send chan []byte
+	name string
+}
+type WsEvent struct {
+	Event string            `json:"event"`
+	Data  map[string]string `json:"data"`
 }
 
 // to read the msg from the client
@@ -44,27 +49,22 @@ func (c *Client) readPump() {
 		}
 
 		//convert to map
-		var ev map[string]interface{}
+		var ev WsEvent
 		if err := json.Unmarshal(msg, &ev); err != nil {
 			log.Println("err while unmarshaling event:", err)
 			continue
 		}
 
-		//extract the data from ev
-		data, err := json.Marshal(ev["data"])
-		if err != nil {
-			log.Println("err while marshaling event data:", err)
-			continue
-		}
-
 		//run func based on events
-		switch ev["event"] {
+		switch ev.Event {
 		case "create:room":
-			c.hub.createRoom(c, data)
+			c.hub.createRoom(c, &ev)
 		case "join:room":
-			c.hub.joinRoom(c, data)
+			c.hub.joinRoom(c, &ev)
+		case "send:offer":
+			c.hub.offerConn(c, &ev)
 		default:
-			fmt.Println("other ev", ev["event"])
+			fmt.Println("other ev", ev.Event)
 		}
 	}
 }

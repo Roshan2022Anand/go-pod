@@ -2,10 +2,10 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import { Provider } from "react-redux";
-import { store } from "./redux/store.ts";
+import { store } from "./providers/redux/store.ts";
 import { Bounce, ToastContainer } from "react-toastify";
-import { MyContextProvider } from "./utils/context/Provider.tsx";
 import App from "./App.tsx";
+import { MyContextProvider } from "./providers/context/Provider.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

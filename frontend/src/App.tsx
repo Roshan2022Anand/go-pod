@@ -1,6 +1,6 @@
-import { useMyContext } from "./utils/context/Mycontext";
 import { RouterProvider } from "@tanstack/react-router";
 import router from "./utils/Routers.tsx";
+import useSocketService from "./service/socket/Config.tsx";
 
 declare module "@tanstack/react-router" {
   interface Register {
@@ -9,7 +9,7 @@ declare module "@tanstack/react-router" {
 }
 
 const App = () => {
-  const { connectSocket } = useMyContext();
+  const { connectSocket } = useSocketService();
   connectSocket();
   return <RouterProvider router={router} />;
 };

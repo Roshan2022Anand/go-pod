@@ -6,80 +6,74 @@ import (
 	"server/internal/utils"
 )
 
-type create struct {
-	Name  string `json:"name"`
-	Email string `json:"email"`
-}
-type join struct {
-	RoomID string `json:"roomId"`
-	Name   string `json:"name"`
-	Email  string `json:"email"`
+// to send the event to the client
+func sendEv(c *Client, ev *WsEvent) {
+	rDataByte, err := json.Marshal(*ev)
+	if err != nil {
+		fmt.Println("err while marshaling event data:", err)
+		return
+	}
+	c.send <- rDataByte
 }
 
 // to create a room
-func (h *Hub) createRoom(c *Client, d []byte) {
-	var data create
-	if err := json.Unmarshal(d, &data); err != nil {
-		fmt.Println("err while unmarshaling event data:", err)
-		return
-	}
+func (h *Hub) createRoom(c *Client, ev *WsEvent) {
 
-	fmt.Println("creating room for ", data.Name)
+	c.name = ev.Data["name"]
 
 	//creating a room inside the hub
-	id := utils.GenerateID(12)
+	id := utils.GenerateID(14)
 	h.rooms[id] = &Room{
 		Clients: map[*Client]bool{
 			c: true,
 		},
 	}
 
-	rData := map[string]interface{}{
-		"event": "room:created",
-		"data": map[string]interface{}{
-			"roomID": id,
+	//return event
+	rData := &WsEvent{
+		Event: "room:created",
+		Data: map[string]string{
+			"roomId": id,
 		},
 	}
 
-	//convert rData to byte
-	rDataByte, err := json.Marshal(rData)
-	if err != nil {
-		fmt.Println("err while marshaling event data:", err)
-		return
-	}
-	c.send <- rDataByte
+	sendEv(c, rData)
 }
 
 // to join a room
-func (h *Hub) joinRoom(c *Client, d []byte) {
-	var data join
-	if err := json.Unmarshal(d, &data); err != nil {
-		fmt.Println("err while unmarshaling event data:", err)
-		return
+func (h *Hub) joinRoom(c *Client, ev *WsEvent) {
+	rData := &WsEvent{
+		Data: map[string]string{},
 	}
 
-
-	rData := make(map[string]interface{})
-	if room, ok := h.rooms[data.RoomID]; ok {
+	//check if the room exists
+	if room, ok := h.rooms[ev.Data["roomID"]]; ok {
+		c.name = ev.Data["name"]
 		room.Clients[c] = true
-		rData["event"] = "room:joined"
-		rData["data"] = map[string]interface{}{
-			"roomID": data.RoomID,
-		}
+		rData.Event = "room:joined"
+		rData.Data["roomId"] = ev.Data["roomID"]
 	} else {
-		rData["event"] = "error"
-		rData["data"] = map[string]interface{}{
-			"message": "room not found",
+		rData.Event = "error"
+		rData.Data["msg"] = "room not found"
+	}
+
+	sendEv(c, rData)
+}
+
+// to offer rtc connection with room members
+func (h *Hub) offerConn(c *Client, ev *WsEvent) {
+
+	rData := &WsEvent{
+		Event: "recived:offer",
+		Data: map[string]string{
+			"sdp": ev.Data["sdp"],
+		},
+	}
+
+	for client := range h.rooms[ev.Data["roomId"]].Clients {
+		if client != c {
+			sendEv(client, rData)
 		}
 	}
 
-	fmt.Println(h.rooms)
-
-	//convert rData to byte
-	rDataByte, err := json.Marshal(rData)
-	if err != nil {
-		fmt.Println("err while marshaling event data:", err)
-		return
-	}
-	c.send <- rDataByte
 }
