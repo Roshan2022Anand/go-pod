@@ -5,7 +5,8 @@ import { Provider } from "react-redux";
 import { store } from "./providers/redux/store.ts";
 import { Bounce, ToastContainer } from "react-toastify";
 import App from "./App.tsx";
-import { MyContextProvider } from "./providers/context/Provider.tsx";
+import SocketProvider from "./providers/context/socket/provider.tsx";
+import WRTCProvider from "./providers/context/wRTC/provider.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -21,10 +22,12 @@ createRoot(document.getElementById("root")!).render(
       theme="dark"
       transition={Bounce}
     />
-    <MyContextProvider>
-      <Provider store={store}>
-        <App />
-      </Provider>
-    </MyContextProvider>
+    <Provider store={store}>
+      <WRTCProvider>
+        <SocketProvider>
+          <App />
+        </SocketProvider>
+      </WRTCProvider>
+    </Provider>
   </StrictMode>
 );

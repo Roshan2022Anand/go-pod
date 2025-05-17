@@ -1,8 +1,8 @@
 import { useRef } from "react";
-import useRoomService from "../../service/socket/Room";
+import useWsEmitService from "../../service/wsEmits";
 
 const Join = () => {
-  const { createRoom, joinRoom } = useRoomService();
+  const { joinRoom, createRoom } = useWsEmitService();
 
   const input = useRef<HTMLInputElement>(null);
   const handleJoinRoom = () => {
