@@ -45,7 +45,6 @@ func (h *Hub) Run() {
 					if len(h.rooms[client.roomID].Clients) == 0 {
 						delete(h.rooms, client.roomID)
 					}
-					fmt.Println(client.name, "removed from room", client.roomID)
 				}
 
 				//remove client from hub

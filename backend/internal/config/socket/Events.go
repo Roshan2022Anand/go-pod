@@ -13,6 +13,7 @@ func sendEv(c *Client, ev *WsEvent) {
 		fmt.Println("err while marshaling event data:", err)
 		return
 	}
+
 	c.send <- rDataByte
 }
 
@@ -21,7 +22,6 @@ func (h *Hub) createRoom(c *Client, ev *WsEvent) {
 
 	c.name = ev.Data["name"]
 	c.email = ev.Data["email"]
-	c.roomID = ev.Data["roomID"]
 
 	//creating a room inside the hub
 	id := utils.GenerateID(14)
@@ -31,7 +31,8 @@ func (h *Hub) createRoom(c *Client, ev *WsEvent) {
 		},
 	}
 
-	//return event
+	c.roomID = id
+	//emit event
 	rData := &WsEvent{
 		Event: "room:created",
 		Data: map[string]string{
@@ -51,24 +52,29 @@ func (h *Hub) joinRoom(c *Client, ev *WsEvent) {
 		Data: map[string]string{},
 	}
 
+	name := ev.Data["name"]
+	email := ev.Data["email"]
+	roomID := ev.Data["roomID"]
+
 	//check if the room exists
 	if room, ok := h.rooms[ev.Data["roomID"]]; ok {
 
 		//inform all the clients in the room
 		for _, client := range room.Clients {
 			rData2.Event = "room:newclient"
-			rData2.Data["name"] = ev.Data["name"]
-			rData2.Data["email"] = ev.Data["email"]
+			rData2.Data["name"] = name
+			rData2.Data["email"] = email
 			sendEv(client, rData2)
 		}
 
 		//add clietn to the room
-		c.name = ev.Data["name"]
-		c.email = ev.Data["email"]
-		c.roomID = ev.Data["roomID"]
-		room.Clients["email"] = c
+		c.name = name
+		c.email = email
+		c.roomID = roomID
+		room.Clients[ev.Data["email"]] = c
+
 		rData1.Event = "room:joined"
-		rData1.Data["roomId"] = ev.Data["roomID"]
+		rData1.Data["roomId"] = roomID
 	} else {
 		rData1.Event = "error"
 		rData1.Data["msg"] = "room not found"
