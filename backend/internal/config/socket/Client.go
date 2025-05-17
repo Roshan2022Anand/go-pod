@@ -21,6 +21,8 @@ type Client struct {
 	conn *websocket.Conn
 	send chan []byte
 	name string
+	email string
+	roomID string
 }
 type WsEvent struct {
 	Event string            `json:"event"`

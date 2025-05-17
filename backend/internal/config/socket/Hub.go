@@ -6,7 +6,7 @@ import (
 )
 
 type Room struct {
-	Clients map[*Client]bool
+	Clients map[string]*Client
 }
 type Hub struct {
 	register   chan *Client
@@ -38,6 +38,16 @@ func (h *Hub) Run() {
 		case client := <-h.unregister:
 			h.mu.Lock()
 			if _, ok := h.clients[client]; ok {
+
+				//remove client from room
+				if client.roomID != "" {
+					delete(h.rooms[client.roomID].Clients, client.email)
+					if len(h.rooms[client.roomID].Clients) == 0 {
+						delete(h.rooms, client.roomID)
+					}
+				}
+
+				//remove client from hub
 				delete(h.clients, client)
 				close(client.send)
 			}

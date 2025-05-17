@@ -13,6 +13,7 @@ func sendEv(c *Client, ev *WsEvent) {
 		fmt.Println("err while marshaling event data:", err)
 		return
 	}
+
 	c.send <- rDataByte
 }
 
@@ -20,16 +21,18 @@ func sendEv(c *Client, ev *WsEvent) {
 func (h *Hub) createRoom(c *Client, ev *WsEvent) {
 
 	c.name = ev.Data["name"]
+	c.email = ev.Data["email"]
 
 	//creating a room inside the hub
 	id := utils.GenerateID(14)
 	h.rooms[id] = &Room{
-		Clients: map[*Client]bool{
-			c: true,
+		Clients: map[string]*Client{
+			ev.Data["email"]: c,
 		},
 	}
 
-	//return event
+	c.roomID = id
+	//emit event
 	rData := &WsEvent{
 		Event: "room:created",
 		Data: map[string]string{
@@ -42,38 +45,44 @@ func (h *Hub) createRoom(c *Client, ev *WsEvent) {
 
 // to join a room
 func (h *Hub) joinRoom(c *Client, ev *WsEvent) {
-	rData := &WsEvent{
+	rData1 := &WsEvent{
+		Data: map[string]string{},
+	}
+	rData2 := &WsEvent{
 		Data: map[string]string{},
 	}
 
+	name := ev.Data["name"]
+	email := ev.Data["email"]
+	roomID := ev.Data["roomID"]
+
 	//check if the room exists
 	if room, ok := h.rooms[ev.Data["roomID"]]; ok {
-		c.name = ev.Data["name"]
-		room.Clients[c] = true
-		rData.Event = "room:joined"
-		rData.Data["roomId"] = ev.Data["roomID"]
+
+		//inform all the clients in the room
+		for _, client := range room.Clients {
+			rData2.Event = "room:newclient"
+			rData2.Data["name"] = name
+			rData2.Data["email"] = email
+			sendEv(client, rData2)
+		}
+
+		//add clietn to the room
+		c.name = name
+		c.email = email
+		c.roomID = roomID
+		room.Clients[ev.Data["email"]] = c
+
+		rData1.Event = "room:joined"
+		rData1.Data["roomId"] = roomID
 	} else {
-		rData.Event = "error"
-		rData.Data["msg"] = "room not found"
+		rData1.Event = "error"
+		rData1.Data["msg"] = "room not found"
 	}
 
-	sendEv(c, rData)
+	sendEv(c, rData1)
 }
 
-// to offer rtc connection with room members
 func (h *Hub) offerConn(c *Client, ev *WsEvent) {
-
-	rData := &WsEvent{
-		Event: "recived:offer",
-		Data: map[string]string{
-			"sdp": ev.Data["sdp"],
-		},
-	}
-
-	for client := range h.rooms[ev.Data["roomId"]].Clients {
-		if client != c {
-			sendEv(client, rData)
-		}
-	}
 
 }
