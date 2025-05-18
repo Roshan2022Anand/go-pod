@@ -3,9 +3,11 @@ import type { WsData, wsEvent } from "../utils/Type";
 import { useDispatch } from "react-redux";
 import { setRoomId } from "../providers/redux/slice/User";
 import { toast } from "react-toastify";
+import useWRTCservice from "./wRTCutils";
 
 const useWsListenService = (ws: WebSocket | null) => {
   const dispatch = useDispatch();
+  const { initOffer } = useWRTCservice();
 
   useEffect(() => {
     //on successful creation
@@ -24,7 +26,15 @@ const useWsListenService = (ws: WebSocket | null) => {
     const newClient = (data: WsData) => {
       const name = data.name;
       const email = data.email;
+      initOffer(email as string); // send offer to the new client
       toast.success(`${name}-${email} joined the room`);
+    };
+
+    //on offer received
+    const offerReceived = (data: WsData) => {
+      const offer = data.offer as RTCSessionDescriptionInit;
+      const email = data.from;
+      console.log("received ", offer, " form ", email);
     };
 
     if (!ws) return;
@@ -42,6 +52,9 @@ const useWsListenService = (ws: WebSocket | null) => {
         case "room:newclient":
           newClient(ev.data);
           break;
+        case "receive:offer":
+          offerReceived(ev.data);
+          break;
         case "error":
           toast.error(ev.data.msg as string);
           break;
@@ -54,7 +67,7 @@ const useWsListenService = (ws: WebSocket | null) => {
     return () => {
       ws.removeEventListener("message", wsMsg);
     };
-  }, [ws, dispatch]);
+  }, [ws, dispatch, initOffer]);
 };
 
 export default useWsListenService;

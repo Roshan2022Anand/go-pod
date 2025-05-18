@@ -1,18 +1,23 @@
 import {
   createContext,
   useContext,
+  type Dispatch,
+  type SetStateAction,
   // type Dispatch,
   // type SetStateAction,
 } from "react";
+import type { wsEvent } from "../../../utils/Type";
 
 type contextT = {
   socket: WebSocket | null;
-  // setSocket: Dispatch<SetStateAction<WebSocket | null>>;
+  wsEmit: (data: wsEvent) => void;
+  setSocket: Dispatch<SetStateAction<WebSocket | null>>;
 };
 
 export const SocketContext = createContext<contextT>({
   socket: null,
-  // setSocket: () => {},
+  wsEmit: () => {},
+  setSocket: () => {},
 });
 
 export const useWsContext = () => {
