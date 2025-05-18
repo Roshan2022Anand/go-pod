@@ -4,17 +4,8 @@ import type { wsEvent } from "../utils/Type";
 import type { RootState } from "../providers/redux/store";
 
 const useWsEmitService = () => {
-  const { socket } = useWsContext();
+  const { wsEmit } = useWsContext();
   const { name, roomId, email } = useSelector((state: RootState) => state.user);
-
-  //to send data to the ws server
-  const wsEmit = (data: wsEvent) => {
-    if (!socket || socket.readyState !== WebSocket.OPEN) {
-      console.error("WebSocket is not connected");
-      return;
-    }
-    socket.send(JSON.stringify(data));
-  };
 
   //to create a room
   const createRoom = () => {
@@ -25,6 +16,7 @@ const useWsEmitService = () => {
         email: email!,
       },
     };
+    console.log("createRoom() => ", payload, wsEmit);
     wsEmit(payload);
   };
 
@@ -41,14 +33,16 @@ const useWsEmitService = () => {
     wsEmit(payload);
   };
 
-  const sendOffer = (offer: RTCSessionDescriptionInit) => {
+  const sendOffer = (offer: RTCSessionDescriptionInit, email: string) => {
     const payload: wsEvent = {
       event: "send:offer",
       data: {
         roomID: roomId!,
         offer,
+        from: email,
       },
     };
+    console.log("sendoffer() => ", payload, wsEmit);
     wsEmit(payload);
   };
 

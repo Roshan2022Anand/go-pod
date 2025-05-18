@@ -85,4 +85,20 @@ func (h *Hub) joinRoom(c *Client, ev *WsEvent) {
 
 func (h *Hub) offerConn(c *Client, ev *WsEvent) {
 
+	email := ev.Data["from"]
+	roomID := ev.Data["roomID"]
+	offer := ev.Data["offer"]
+
+	client := h.rooms[roomID].Clients[email]
+
+	rData := &WsEvent{
+		Event: "receive:offer",
+		Data: map[string]string{
+			"offer": offer,
+			"from":  c.email,
+		},
+	}
+
+	fmt.Println(rData, " is sent to ", client.email)
+	sendEv(client, rData)
 }

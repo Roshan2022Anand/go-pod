@@ -5,23 +5,24 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/websocket"
 )
 
-// const (
-// 	writeWait      = 10 * time.Second
-// 	pongWait       = 60 * time.Second
-// 	pingPeriod     = (pongWait * 9) / 10
-// 	maxMessageSize = 512
-// )
+const (
+	writeWait      = 10 * time.Second
+	pongWait       = 60 * time.Second
+	pingPeriod     = (pongWait * 9) / 10
+	maxMessageSize = 512
+)
 
 type Client struct {
-	hub  *Hub
-	conn *websocket.Conn
-	send chan []byte
-	name string
-	email string
+	hub    *Hub
+	conn   *websocket.Conn
+	send   chan []byte
+	name   string
+	email  string
 	roomID string
 }
 type WsEvent struct {
@@ -36,9 +37,9 @@ func (c *Client) readPump() {
 		c.conn.Close()
 	}()
 
-	// c.conn.SetReadLimit(maxMessageSize)
-	// c.conn.SetReadDeadline(time.Now().Add(pongWait))
-	// c.conn.SetPongHandler(func(string) error { c.conn.SetReadDeadline(time.Now().Add(pongWait)); return nil })
+	c.conn.SetReadLimit(maxMessageSize)
+	c.conn.SetReadDeadline(time.Now().Add(pongWait))
+	c.conn.SetPongHandler(func(string) error { c.conn.SetReadDeadline(time.Now().Add(pongWait)); return nil })
 
 	for {
 		//reading the msg from client
