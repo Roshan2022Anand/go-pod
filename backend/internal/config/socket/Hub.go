@@ -44,14 +44,15 @@ func (h *Hub) Run() {
 					delete(h.rooms[client.roomID].Clients, client.email)
 					if len(h.rooms[client.roomID].Clients) == 0 {
 						delete(h.rooms, client.roomID)
+						fmt.Println("room deleted", client.roomID)
 					}
 				}
 
 				//remove client from hub
 				delete(h.clients, client)
 				close(client.send)
+				fmt.Println("client unregistered", client.conn.RemoteAddr())
 			}
-			fmt.Println("client unregistered", client.conn.RemoteAddr())
 			h.mu.Unlock()
 		}
 	}

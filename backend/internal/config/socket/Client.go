@@ -54,7 +54,7 @@ func (c *Client) readPump() {
 		//convert to map
 		var ev WsEvent
 		if err := json.Unmarshal(msg, &ev); err != nil {
-			log.Println("err while unmarshaling event:", err)
+			log.Println("err while unmarshaling event:", err, string(msg))
 			continue
 		}
 
@@ -110,7 +110,7 @@ var upgrader = websocket.Upgrader{
 func ServeWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		log.Println(err)
+		log.Println("serverws", err)
 		return
 	}
 	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256)}

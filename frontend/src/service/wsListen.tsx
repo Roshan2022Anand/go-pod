@@ -26,13 +26,13 @@ const useWsListenService = (ws: WebSocket | null) => {
     const newClient = (data: WsData) => {
       const name = data.name;
       const email = data.email;
-      initOffer(email as string); // send offer to the new client
+      initOffer(ws, email as string); // send offer to the new client
       toast.success(`${name}-${email} joined the room`);
     };
 
     //on offer received
     const offerReceived = (data: WsData) => {
-      const offer = data.offer as RTCSessionDescriptionInit;
+      const offer: RTCSessionDescriptionInit = JSON.parse(data.offer as string);
       const email = data.from;
       console.log("received ", offer, " form ", email);
     };
