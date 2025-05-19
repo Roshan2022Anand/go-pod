@@ -1,14 +1,27 @@
 import { useSelector } from "react-redux";
-import { useWsContext } from "../providers/context/socket/config";
 import type { wsEvent } from "../utils/Type";
 import type { RootState } from "../providers/redux/store";
 
 const useWsEmitService = () => {
-  const { wsEmit } = useWsContext();
   const { name, roomId, email } = useSelector((state: RootState) => state.user);
 
+  // Create a stable reference for wsEmit that won't change between renders
+  const wsEmit = (socket: WebSocket | null, data: wsEvent) => {
+    if (!socket) {
+      console.error("WebSocket is ", socket);
+      return;
+    }
+
+    if (socket.readyState !== WebSocket.OPEN) {
+      console.error(`WebSocket is not open (state: ${socket.readyState})`);
+      return;
+    }
+
+    socket.send(JSON.stringify(data));
+  };
+
   //to create a room
-  const createRoom = () => {
+  const createRoom = (ws: WebSocket | null) => {
     const payload: wsEvent = {
       event: "create:room",
       data: {
@@ -16,12 +29,11 @@ const useWsEmitService = () => {
         email: email!,
       },
     };
-    console.log("createRoom() => ", payload, wsEmit);
-    wsEmit(payload);
+    wsEmit(ws, payload);
   };
 
   //to join a room
-  const joinRoom = async (id: string) => {
+  const joinRoom = async (ws: WebSocket | null, id: string) => {
     const payload: wsEvent = {
       event: "join:room",
       data: {
@@ -30,20 +42,24 @@ const useWsEmitService = () => {
         roomID: id,
       },
     };
-    wsEmit(payload);
+    wsEmit(ws, payload);
   };
 
-  const sendOffer = (offer: RTCSessionDescriptionInit, email: string) => {
+  //to send offer to the new client
+  const sendOffer = (
+    ws: WebSocket | null,
+    offer: RTCSessionDescriptionInit,
+    email: string
+  ) => {
     const payload: wsEvent = {
       event: "send:offer",
       data: {
         roomID: roomId!,
-        offer,
+        offer: JSON.stringify(offer),
         from: email,
       },
     };
-    console.log("sendoffer() => ", payload, wsEmit);
-    wsEmit(payload);
+    wsEmit(ws, payload);
   };
 
   return { createRoom, joinRoom, sendOffer };

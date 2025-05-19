@@ -6,7 +6,6 @@ import { store } from "./providers/redux/store.ts";
 import { Bounce, ToastContainer } from "react-toastify";
 import App from "./App.tsx";
 import SocketProvider from "./providers/context/socket/provider.tsx";
-import WRTCProvider from "./providers/context/wRTC/provider.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -23,11 +22,9 @@ createRoot(document.getElementById("root")!).render(
       transition={Bounce}
     />
     <Provider store={store}>
-      <WRTCProvider>
-        <SocketProvider>
-          <App />
-        </SocketProvider>
-      </WRTCProvider>
+      <SocketProvider>
+        <App />
+      </SocketProvider>
     </Provider>
   </StrictMode>
 );

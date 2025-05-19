@@ -28,6 +28,7 @@ const Room = () => {
       ws = new WebSocket("ws://localhost:8080/ws");
       ws.addEventListener("open", wsOpen);
       ws.addEventListener("close", wsClose);
+      ws.addEventListener("error", wsError);
     };
 
     const wsOpen = () => {
@@ -41,11 +42,17 @@ const Room = () => {
       reconnectTimer = setTimeout(connectWS, 4000);
     };
 
+    const wsError = (err: Event) => {
+      console.log("socket error", err);
+      setSocket(null);
+    };
+
     connectWS();
     //clean up
     return () => {
       ws.removeEventListener("open", wsOpen);
       ws.removeEventListener("close", wsClose);
+      ws.removeEventListener("error", wsError);
       ws.close();
       clearTimeout(reconnectTimer);
       setSocket(null);

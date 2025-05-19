@@ -1,19 +1,26 @@
 import { useRef } from "react";
 import useWsEmitService from "../../service/wsEmits";
+import { useWsContext } from "../../providers/context/socket/config";
 
 const Join = () => {
   const { joinRoom, createRoom } = useWsEmitService();
-
+  const { socket } = useWsContext();
   const input = useRef<HTMLInputElement>(null);
   const handleJoinRoom = () => {
     const val = input.current?.value;
     if (!val) return;
-    joinRoom(val);
+    joinRoom(socket, val);
   };
 
   return (
     <>
-      <button onClick={createRoom}>Create </button>
+      <button
+        onClick={() => {
+          createRoom(socket);
+        }}
+      >
+        Create{" "}
+      </button>
       <input
         ref={input}
         type="text"

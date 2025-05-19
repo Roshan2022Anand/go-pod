@@ -84,7 +84,6 @@ func (h *Hub) joinRoom(c *Client, ev *WsEvent) {
 }
 
 func (h *Hub) offerConn(c *Client, ev *WsEvent) {
-
 	email := ev.Data["from"]
 	roomID := ev.Data["roomID"]
 	offer := ev.Data["offer"]
@@ -99,6 +98,5 @@ func (h *Hub) offerConn(c *Client, ev *WsEvent) {
 		},
 	}
 
-	fmt.Println(rData, " is sent to ", client.email)
 	sendEv(client, rData)
 }
