@@ -6,3 +6,5 @@ export type wsEvent = {
   event: string;
   data: WsData;
 };
+
+export type peerSdpT = Map<string, RTCPeerConnection>;

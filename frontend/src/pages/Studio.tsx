@@ -6,6 +6,7 @@ import Pod from "../components/studio/Pod";
 import { setRoomId } from "../providers/redux/slice/User";
 import { useEffect } from "react";
 import { useWsContext } from "../providers/context/socket/config";
+import { peerSdp } from "../service/wRTCutils";
 
 const Room = () => {
   const navigate = useNavigate();
@@ -22,7 +23,6 @@ const Room = () => {
   useEffect(() => {
     let ws: WebSocket;
     let reconnectTimer: ReturnType<typeof setTimeout>;
-
     //to connect ws
     const connectWS = () => {
       ws = new WebSocket("ws://localhost:8080/ws");
@@ -38,13 +38,12 @@ const Room = () => {
 
     const wsClose = () => {
       console.log("socket is disconnected");
-      setSocket(null);
+      ws.close();
       reconnectTimer = setTimeout(connectWS, 4000);
     };
 
     const wsError = (err: Event) => {
       console.log("socket error", err);
-      setSocket(null);
     };
 
     connectWS();
@@ -55,7 +54,6 @@ const Room = () => {
       ws.removeEventListener("error", wsError);
       ws.close();
       clearTimeout(reconnectTimer);
-      setSocket(null);
     };
   }, [setSocket]);
 
@@ -67,6 +65,8 @@ const Room = () => {
       ) : (
         <>{roomId ? <Pod /> : <Join />}</>
       )}
+
+      <button onClick={() => console.log(peerSdp)}>show RTC</button>
     </>
   );
 };

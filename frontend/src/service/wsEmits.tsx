@@ -3,9 +3,9 @@ import type { wsEvent } from "../utils/Type";
 import type { RootState } from "../providers/redux/store";
 
 const useWsEmitService = () => {
-  const { name, roomId, email } = useSelector((state: RootState) => state.user);
+  const { name, email } = useSelector((state: RootState) => state.user);
 
-  // Create a stable reference for wsEmit that won't change between renders
+  // to send msg to ws server
   const wsEmit = (socket: WebSocket | null, data: wsEvent) => {
     if (!socket) {
       console.error("WebSocket is ", socket);
@@ -45,24 +45,7 @@ const useWsEmitService = () => {
     wsEmit(ws, payload);
   };
 
-  //to send offer to the new client
-  const sendOffer = (
-    ws: WebSocket | null,
-    offer: RTCSessionDescriptionInit,
-    email: string
-  ) => {
-    const payload: wsEvent = {
-      event: "send:offer",
-      data: {
-        roomID: roomId!,
-        offer: JSON.stringify(offer),
-        from: email,
-      },
-    };
-    wsEmit(ws, payload);
-  };
-
-  return { createRoom, joinRoom, sendOffer };
+  return { createRoom, joinRoom, wsEmit };
 };
 
 export default useWsEmitService;

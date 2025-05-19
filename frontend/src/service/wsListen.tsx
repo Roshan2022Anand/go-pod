@@ -7,7 +7,7 @@ import useWRTCservice from "./wRTCutils";
 
 const useWsListenService = (ws: WebSocket | null) => {
   const dispatch = useDispatch();
-  const { initOffer } = useWRTCservice();
+  const { initOffer, initAns, setRemoteAns } = useWRTCservice();
 
   useEffect(() => {
     //on successful creation
@@ -34,7 +34,14 @@ const useWsListenService = (ws: WebSocket | null) => {
     const offerReceived = (data: WsData) => {
       const offer: RTCSessionDescriptionInit = JSON.parse(data.offer as string);
       const email = data.from;
-      console.log("received ", offer, " form ", email);
+      initAns(ws, offer, email as string);
+    };
+
+    //on answer received
+    const ansReceived = (data: WsData) => {
+      const ans: RTCSessionDescriptionInit = JSON.parse(data.answer as string);
+      const email = data.from;
+      setRemoteAns(ans,email as string);
     };
 
     if (!ws) return;
@@ -55,6 +62,9 @@ const useWsListenService = (ws: WebSocket | null) => {
         case "receive:offer":
           offerReceived(ev.data);
           break;
+        case "receive:answer":
+          ansReceived(ev.data);
+          break;
         case "error":
           toast.error(ev.data.msg as string);
           break;
@@ -67,7 +77,7 @@ const useWsListenService = (ws: WebSocket | null) => {
     return () => {
       ws.removeEventListener("message", wsMsg);
     };
-  }, [ws, dispatch, initOffer]);
+  }, [ws, dispatch, initOffer, initAns, setRemoteAns]);
 };
 
 export default useWsListenService;

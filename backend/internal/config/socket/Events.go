@@ -83,8 +83,9 @@ func (h *Hub) joinRoom(c *Client, ev *WsEvent) {
 	sendEv(c, rData1)
 }
 
+// to send RTC offer
 func (h *Hub) offerConn(c *Client, ev *WsEvent) {
-	email := ev.Data["from"]
+	email := ev.Data["to"]
 	roomID := ev.Data["roomID"]
 	offer := ev.Data["offer"]
 
@@ -95,6 +96,26 @@ func (h *Hub) offerConn(c *Client, ev *WsEvent) {
 		Data: map[string]string{
 			"offer": offer,
 			"from":  c.email,
+		},
+	}
+
+	sendEv(client, rData)
+}
+
+// to send RTC answer
+func (h *Hub) answerConn(c *Client, ev *WsEvent) {
+
+	email := ev.Data["to"]
+	roomID := ev.Data["roomID"]
+	answer := ev.Data["answer"]
+
+	client := h.rooms[roomID].Clients[email]
+
+	rData := &WsEvent{
+		Event: "receive:answer",
+		Data: map[string]string{
+			"answer": answer,
+			"from":   c.email,
 		},
 	}
 
