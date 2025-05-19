@@ -38,7 +38,7 @@ func (c *Client) readPump() {
 	}()
 
 	c.conn.SetReadLimit(maxMessageSize)
-	c.conn.SetReadDeadline(time.Now().Add(pongWait))
+	// c.conn.SetReadDeadline(time.Now().Add(pongWait))
 	c.conn.SetPongHandler(func(string) error { c.conn.SetReadDeadline(time.Now().Add(pongWait)); return nil })
 
 	for {
@@ -66,6 +66,8 @@ func (c *Client) readPump() {
 			c.hub.joinRoom(c, &ev)
 		case "send:offer":
 			c.hub.offerConn(c, &ev)
+		case "send:answer":
+			c.hub.answerConn(c, &ev)
 		default:
 			fmt.Println("other ev", ev.Event)
 		}

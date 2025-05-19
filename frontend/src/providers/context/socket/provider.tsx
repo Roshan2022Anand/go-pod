@@ -5,9 +5,7 @@ import useWsListenService from "../../../service/wsListen";
 
 const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   const [socket, setSocket] = useState<WebSocket | null>(null);
-
   useWsListenService(socket);
-
   return (
     <SocketContext.Provider value={{ socket, setSocket }}>
       {children}
