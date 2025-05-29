@@ -58,6 +58,7 @@ func (c *Client) readPump() {
 			continue
 		}
 
+		
 		//run func based on events
 		switch ev.Event {
 		case "create:room":

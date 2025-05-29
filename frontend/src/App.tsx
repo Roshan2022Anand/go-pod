@@ -1,7 +1,7 @@
 import { RouterProvider } from "@tanstack/react-router";
 import router from "./utils/Routers.tsx";
 import { useSelector } from "react-redux";
-import type { RootState } from "./providers/redux/store.ts";
+import type { StateT } from "./providers/redux/store.ts";
 
 declare module "@tanstack/react-router" {
   interface Register {
@@ -10,7 +10,7 @@ declare module "@tanstack/react-router" {
 }
 
 const App = () => {
-  const { name, email } = useSelector((state: RootState) => state.user);
+  const { name, email } = useSelector((state: StateT) => state.user);
   return (
     <>
       <p className="text-right">

@@ -7,4 +7,5 @@ export type wsEvent = {
   data: WsData;
 };
 
-export type peerSdpT = Map<string, RTCPeerConnection>;
+export type RemoteStreamT = Map<string, MediaStream>;
+export type PeersT = Map<string, RTCPeerConnection>;
