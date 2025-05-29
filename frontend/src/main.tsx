@@ -5,7 +5,7 @@ import { Provider } from "react-redux";
 import { store } from "./providers/redux/store.ts";
 import { Bounce, ToastContainer } from "react-toastify";
 import App from "./App.tsx";
-import SocketProvider from "./providers/context/socket/provider.tsx";
+import ContextProvider from "./providers/context/provider.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -22,9 +22,9 @@ createRoot(document.getElementById("root")!).render(
       transition={Bounce}
     />
     <Provider store={store}>
-      <SocketProvider>
+      <ContextProvider>
         <App />
-      </SocketProvider>
+      </ContextProvider>
     </Provider>
   </StrictMode>
 );

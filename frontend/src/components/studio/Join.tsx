@@ -1,26 +1,34 @@
-import { useRef } from "react";
-import useWsEmitService from "../../service/wsEmits";
-import { useWsContext } from "../../providers/context/socket/config";
+import { useEffect, useRef } from "react";
+import useRoomService from "../../service/room";
+import { useMyContext } from "../../providers/context/config";
+import Player from "./Player";
 
 const Join = () => {
-  const { joinRoom, createRoom } = useWsEmitService();
-  const { socket } = useWsContext();
+  const { create, join } = useRoomService();
+  const { setMyStream, myStream } = useMyContext();
+
   const input = useRef<HTMLInputElement>(null);
   const handleJoinRoom = () => {
     const val = input.current?.value;
     if (!val) return;
-    joinRoom(socket, val);
+    join(val);
   };
+
+  useEffect(() => {
+    const getMedia = async () => {
+      const media = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+        video: true,
+      });
+      setMyStream(media);
+    };
+    getMedia();
+  }, [setMyStream]);
 
   return (
     <>
-      <button
-        onClick={() => {
-          createRoom(socket);
-        }}
-      >
-        Create{" "}
-      </button>
+      <Player stream={myStream} user="you" />
+      <button onClick={create}>Create </button>
       <input
         ref={input}
         type="text"

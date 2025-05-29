@@ -1,4 +1,9 @@
-server : 
+node :
+	@clear && \
+	cd nodejs && \
+	pnpm dev
+
+go : 
 	@clear && \
 	cd backend && \
 	go mod tidy && \
