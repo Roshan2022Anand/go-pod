@@ -21,17 +21,20 @@ export const initSocket = (server: HttpServer) => {
   });
 
   io.on("connection", (socket) => {
+    console.log("new connection", socket.id);
     // to set all the event's related to the socket server
     RoomEvents(socket);
     wRtcEvents(socket);
 
     socket.on("disconnect", () => {
       const email = WsToEmail.get(socket);
-      if (!email) return;
-      WsRoom.forEach((room, roomId) => {
-        if (room.has(email)) room.delete(email);
-        if (room.size == 0) WsRoom.delete(roomId);
-      });
+      if (email) {
+        WsRoom.forEach((room, roomId) => {
+          if (room.members.has(email)) room.members.delete(email);
+          if (room.members.size == 0) WsRoom.delete(roomId);
+        });
+      }
+      console.log("disconnected", socket.id);
     });
   });
 };

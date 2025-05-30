@@ -3,10 +3,9 @@ import { WsRoom, WsToEmail } from "../config/socket";
 
 //All the events related to wRTC connection is here
 export const wRtcEvents = (ws: Socket) => {
-  
   //event to send the incomming SDP to respective client
   ws.on("sdp:sent", ({ roomID, email, sdp }) => {
-    const socket = WsRoom.get(roomID)?.get(email)?.ws;
+    const socket = WsRoom.get(roomID)?.members.get(email)?.ws;
     if (!socket) {
       ws.emit("error", { msg: email + " is not in the pod" });
       return;
@@ -18,7 +17,7 @@ export const wRtcEvents = (ws: Socket) => {
 
   //event to send the incomming ICE candiate info to respective client
   ws.on("ice:sent", ({ roomID, email, candidate }) => {
-    const socket = WsRoom.get(roomID)?.get(email)?.ws;
+    const socket = WsRoom.get(roomID)?.members.get(email)?.ws;
     if (!socket) {
       ws.emit("error", { msg: email + " is not in the pod" });
       return;

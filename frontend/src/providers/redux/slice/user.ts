@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { generateID } from "../../../utils/genrator";
+import { generateID } from "../../../lib/genrator";
 
 type UserState = {
   name: string;

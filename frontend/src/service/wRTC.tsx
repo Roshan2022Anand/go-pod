@@ -8,7 +8,7 @@ import { toast } from "react-toastify";
 import { Socket } from "socket.io-client";
 import { useSelector } from "react-redux";
 import type { StateT } from "../providers/redux/store";
-import type { PeersT, RemoteStreamT } from "../utils/Type";
+import type { PeersT, RemoteStreamT } from "../lib/Type";
 
 //hold's all the connected wRTC peers instance
 //used to access respective peers based on client's email

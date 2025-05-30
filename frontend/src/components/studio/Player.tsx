@@ -9,16 +9,16 @@ const Player = ({
   user: string;
 }) => {
   return (
-    <>
-      <p>{user}</p>
+    <figure className="relative">
+      <p className="absolute bottom-0 right-0 m-2">{user}</p>
       {stream ? (
-        <ReactPlayer url={stream} playing height="200px" width="200px" muted />
+        <ReactPlayer url={stream} width="300px" height="300px" playing muted />
       ) : (
-        <div className="size-[200px] rounded-md bg-pink-400 ">
-          <BiUser className="icon-md" />
+        <div className="size-[200px] rounded-md bg-orange-300 flex items-center justify-center">
+          <BiUser className="icon-lg border-4 rounded-full" />
         </div>
       )}
-    </>
+    </figure>
   );
 };
 

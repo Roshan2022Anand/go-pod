@@ -3,8 +3,9 @@ import {
   createRoute,
   createRootRoute,
 } from "@tanstack/react-router";
-import Room from "../pages/Studio";
 import Landing from "../pages/Landing";
+import Studio from "@/pages/Studio";
+import NotFound from "@/NotFound";
 
 const rootRoute = createRootRoute();
 
@@ -16,11 +17,17 @@ const indexRoute = createRoute({
 
 const roomRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/studio",
-  component: () => <Room />,
+  path: "/studio/$studioID",
+  // loader: async ({ params }) => {
+  //   const { studioID } = params;
+  // },
+  component: () => <Studio />,
 });
 
 const routeTree = rootRoute.addChildren([indexRoute, roomRoute]);
-const router = createRouter({ routeTree });
+const router = createRouter({
+  routeTree,
+  defaultNotFoundComponent: NotFound,
+});
 
 export default router;

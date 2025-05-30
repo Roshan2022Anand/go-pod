@@ -5,7 +5,7 @@ import {
   type SetStateAction,
 } from "react";
 import type { Socket } from "socket.io-client";
-import type { RemoteStreamT } from "../../utils/Type";
+import type { RemoteStreamT } from "../../lib/Type";
 
 type contextT = {
   socket: Socket | null;

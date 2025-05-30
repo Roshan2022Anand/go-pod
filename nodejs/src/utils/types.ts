@@ -7,4 +7,4 @@ type UserT = {
 
 type RoomMembersT = Map<string, UserT>;
 
-export type RoomT = Map<string, RoomMembersT>;
+export type RoomT = Map<string, { studioID: string; members: RoomMembersT }>;
