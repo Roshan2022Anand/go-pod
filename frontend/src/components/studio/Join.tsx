@@ -17,6 +17,7 @@ const Join = () => {
   const { email, name } = useSelector((state: StateT) => state.user);
   const { role } = useSelector((state: StateT) => state.room);
 
+  //to validate client's authorization in the pod
   const { studioID } = useParams({ from: "/studio/$studioID" });
   const { rID } = useSearch({ from: "/studio/$studioID" }) as { rID: string };
   useEffect(() => {

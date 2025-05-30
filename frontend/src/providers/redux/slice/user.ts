@@ -1,22 +1,29 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { generateID } from "../../../lib/genrator";
 
 type UserState = {
-  name: string;
-  email: string;
+  name: string | null;
+  email: string | null;
   pic: string | null;
 };
 
 const initialState: UserState = {
-  name: "user_" + generateID(2),
-  email: generateID(3) + "@gmail.com",
-  pic: "aa",
+  name: null,
+  email: null,
+  pic: null,
 };
 
 const UserSlice = createSlice({
   name: "user",
   initialState,
-  reducers: {},
+  reducers: {
+    setDetails: (state, action) => {
+      const { name, email } = action.payload;
+      state.name = name;
+      state.email = email;
+    },
+  },
 });
+
+export const { setDetails } = UserSlice.actions;
 
 export default UserSlice.reducer;

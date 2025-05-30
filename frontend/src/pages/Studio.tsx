@@ -8,12 +8,17 @@ import { useMyContext } from "../providers/context/config";
 import { IoMdArrowBack } from "react-icons/io";
 import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
+import { peers } from "@/service/wRTC";
+import useAuth from "@/hooks/auth";
+import Loading from "@/Loading";
+
 const Studio = () => {
+  useAuth();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { setSocket } = useMyContext();
+  const { setSocket, myStream, setMyStream } = useMyContext();
   const { roomID } = useSelector((state: StateT) => state.room);
-
+  const { name, email } = useSelector((state: StateT) => state.user);
   const [isConnected, setIsConnected] = useState(false);
 
   //connect to WS
@@ -38,9 +43,23 @@ const Studio = () => {
     };
   }, [setSocket]);
 
+  if (!name || !email) return <Loading />;
+
   //to exit the pod
   const handleExitRoom = () => {
     if (roomID) dispatch(setRoomId(null));
+    if (myStream) {
+      myStream.getTracks().forEach((track) => {
+        track.stop();
+      });
+      setMyStream(null);
+
+      //disconnect all the peers
+      for (const i in peers) {
+        peers.get(i)?.close();
+        peers.delete(i);
+      }
+    }
     navigate({ to: "/" });
   };
 

@@ -23,7 +23,7 @@ const Pod = () => {
       <section className="grow ">
         <Player stream={myStream} user="you" />
         {Array.from(remoteStreams.entries()).map(([email, stream]) => (
-          <Player stream={stream} user={email} />
+          <Player stream={stream} user={email} key={email} />
         ))}
       </section>
       <section className="h-[70px] border-2 w-1/3 mx-auto rounded-md mb-2 flex  justify-center">

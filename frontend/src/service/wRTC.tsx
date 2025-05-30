@@ -12,7 +12,7 @@ import type { PeersT, RemoteStreamT } from "../lib/Type";
 
 //hold's all the connected wRTC peers instance
 //used to access respective peers based on client's email
-const peers: PeersT = new Map();
+export const peers: PeersT = new Map();
 
 //wRTC server configuration
 const rtcConfig = {
@@ -32,7 +32,7 @@ const useWrtcService = (
 ) => {
   const { roomID } = useSelector((state: StateT) => state.room);
 
-  //handle ICE and media stream exchanges
+  //handle RTCpeer events
   const setPeerEv = useCallback(
     (email: string, peer: RTCPeerConnection) => {
       if (!socket || !roomID) return;
@@ -61,6 +61,20 @@ const useWrtcService = (
           peer.addTrack(track, myStream);
         });
       }
+
+      //to handle peer disconnection
+      peer.onconnectionstatechange = () => {
+        const state = peer.connectionState;
+        if (state !== "disconnected") return;
+
+        peer.close();
+        peers.delete(email);
+        setRemoteStreams((prev) => {
+          prev.delete(email);
+          return new Map(prev);
+        });
+        toast.error(`${email} disconnected from the room`);
+      };
     },
     [setRemoteStreams, myStream, socket, roomID]
   );
