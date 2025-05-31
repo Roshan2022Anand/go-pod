@@ -4,12 +4,15 @@ import cors from "cors";
 import { env } from "process";
 import dotenv from "dotenv";
 import { initSocket } from "./config/socket";
+import authRouter from "./routes/auth";
+import cookieParser from "cookie-parser";
 
 dotenv.config();
 
 const app = express();
 const server = createServer(app);
 app.use(express.json());
+app.use(cookieParser());
 
 app.use(
   cors({
@@ -21,6 +24,7 @@ app.use(
 );
 
 initSocket(server); //initialize the websocket
+app.use("/auth", authRouter); //auth routes
 
 const PORT = env.PORT || 5000;
 server.listen(PORT, () => {

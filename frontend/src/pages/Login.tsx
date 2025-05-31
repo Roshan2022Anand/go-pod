@@ -14,7 +14,7 @@ const Login = () => {
   const nameInp = useRef<HTMLInputElement>(null);
   const emailInp = useRef<HTMLInputElement>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const name = nameInp.current?.value;
     const email = emailInp.current?.value;
@@ -22,12 +22,19 @@ const Login = () => {
       toast.error("Please fill in all fields");
       return;
     }
+
+    await fetch(import.meta.env.VITE_NODE_URL + "/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ name, email }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+    });
+
     dispatch(setDetails({ name, email }));
-    localStorage.setItem("name", name);
-    localStorage.setItem("email", email);
     const redirectTO = search.redirect || "/";
     navigate({ to: redirectTO });
-    console.log("navigation to", redirectTO);
   };
 
   return (
