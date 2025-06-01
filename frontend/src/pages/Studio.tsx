@@ -1,22 +1,17 @@
-import { useNavigate } from "@tanstack/react-router";
 import Join from "../components/studio/Join";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import Pod from "../components/studio/Pod";
 import type { StateT } from "../providers/redux/store";
-import { setRoomId } from "../providers/redux/slice/room";
 import { useMyContext } from "../providers/context/config";
-import { IoMdArrowBack } from "react-icons/io";
 import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
-import { peers } from "@/service/wRTC";
 import useAuth from "@/hooks/auth";
 import Loading from "@/Loading";
+import { StudioNav } from "@/components/studio/Nav";
 
 const Studio = () => {
   useAuth();
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const { setSocket, myStream, setMyStream } = useMyContext();
+  const { setSocket } = useMyContext();
   const { roomID } = useSelector((state: StateT) => state.room);
   const { name, email } = useSelector((state: StateT) => state.user);
   const [isConnected, setIsConnected] = useState(false);
@@ -45,29 +40,9 @@ const Studio = () => {
 
   if (!name || !email) return <Loading />;
 
-  //to exit the pod
-  const handleExitRoom = () => {
-    if (roomID) dispatch(setRoomId(null));
-    if (myStream) {
-      myStream.getTracks().forEach((track) => {
-        track.stop();
-      });
-      setMyStream(null);
-
-      //disconnect all the peers
-      for (const i in peers) {
-        peers.get(i)?.close();
-        peers.delete(i);
-      }
-    }
-    navigate({ to: "/" });
-  };
-
   return (
     <main className="h-screen flex flex-col">
-      <button onClick={handleExitRoom}>
-        <IoMdArrowBack className="icon-md" />
-      </button>
+      <StudioNav />
       {isConnected ? (
         <>{roomID ? <Pod /> : <Join />}</>
       ) : (

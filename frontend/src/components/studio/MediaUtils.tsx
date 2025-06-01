@@ -3,19 +3,19 @@ import { Button } from "../ui/button";
 import { useState } from "react";
 import { BsCameraVideoFill, BsCameraVideoOffFill } from "react-icons/bs";
 
-export const ControlerMic = ({
+const ControlerMic = ({
   stream,
   className,
 }: {
   stream: MediaStream;
-  className: string;
+  className?: string;
 }) => {
   const [isEnabled, setIsEnabled] = useState(
     stream.getAudioTracks()[0].enabled
   );
   return (
     <Button
-      className={`h-full ${className}`}
+      className={`h-full ${className || ''}`}
       onClick={() => {
         stream.getAudioTracks().forEach((track) => {
           track.enabled = !track.enabled;
@@ -32,19 +32,19 @@ export const ControlerMic = ({
   );
 };
 
-export const ControlerCamera = ({
+const ControlerCamera = ({
   stream,
   className,
 }: {
   stream: MediaStream;
-  className: string;
+  className?: string;
 }) => {
   const [isEnabled, setIsEnabled] = useState(
     stream.getVideoTracks()[0].enabled
   );
   return (
     <Button
-      className={`h-full ${className}`}
+      className={`h-full ${className || ''}`}
       onClick={async () => {
         stream.getVideoTracks().forEach((track) => {
           track.enabled = !track.enabled;
@@ -60,3 +60,5 @@ export const ControlerCamera = ({
     </Button>
   );
 };
+
+export { ControlerMic, ControlerCamera };

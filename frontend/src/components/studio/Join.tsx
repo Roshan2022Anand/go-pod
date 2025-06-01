@@ -9,6 +9,7 @@ import { CheckStudioID } from "@/lib/genrator";
 import { setPodRole, setStudioId } from "@/providers/redux/slice/room";
 import { useDispatch, useSelector } from "react-redux";
 import type { StateT } from "@/providers/redux/store";
+import Loading from "@/Loading";
 const Join = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -21,6 +22,8 @@ const Join = () => {
   const { studioID } = useParams({ from: "/studio/$studioID" });
   const { rID } = useSearch({ from: "/studio/$studioID" }) as { rID: string };
   useEffect(() => {
+    if (!email) return;
+    console.log(studioID, rID, email);
     if (CheckStudioID(studioID, email)) {
       dispatch(setStudioId(studioID));
       dispatch(setPodRole("host"));
@@ -74,7 +77,7 @@ const Join = () => {
           </figure>
         </>
       ) : (
-        <h3>cokking your connection...</h3>
+        <Loading />
       )}
     </section>
   );

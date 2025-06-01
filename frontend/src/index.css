@@ -105,25 +105,6 @@ p {
   height: clamp(1.25rem, 0.8rem + 1vw, 1.75rem);
 }
 
-/* Ensure minimum touch target size */
-.click-icon {
-  min-width: 48px;
-  min-height: 48px;
-  padding: clamp(0.5rem, 0.3rem + 0.5vw, 1rem);
-}
-
-.container {
-  width: 90%;
-  max-width: 1200px;
-  margin-inline: auto;
-}
-
-button {
-  display: inline-block;
-  padding: 0.25rem 0.5rem;
-  cursor: pointer;
-}
-
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -202,5 +183,27 @@ button {
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* studio layout design */
+/* .two {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.three {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.even-layout {
+} */
+.odd-layout {
+  & > :nth-child(1) {
+    grid-row: span 2;
   }
 }

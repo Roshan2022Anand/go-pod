@@ -16,19 +16,30 @@ const useAuth = () => {
   const path = useRouterState({
     select: (state) => state.location.pathname,
   });
+  const search = useRouterState({
+    select: (state) => state.location.search as { rID: string },
+  });
 
   useEffect(() => {
     if (email && name) return;
+
+    //to navigate to
+    // 
+    //  login and redirect to previous page
     const redirect = () => {
       if (path !== "/login") {
+        let query = "";
+        if (path.includes("studio")) query = "?rID=" + search.rID;
+        console.log("back to ", path + query);
         navigate({
           to: "/login",
           search: {
-            redirect: path,
+            redirect: path + query,
           },
         });
       }
     };
+
     const checkAuth = async () => {
       try {
         const res = await fetch(import.meta.env.VITE_NODE_URL + "/auth/user", {

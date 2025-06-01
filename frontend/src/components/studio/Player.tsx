@@ -1,18 +1,39 @@
 import { BiUser } from "react-icons/bi";
-import ReactPlayer from "react-player";
+import { useEffect, useRef } from "react";
 
 const Player = ({
   stream,
   user,
+  className,
 }: {
   stream: MediaStream | null;
   user: string;
+  className?: string;
 }) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
+
+  useEffect(() => {
+    if (videoRef.current) videoRef.current.srcObject = stream;
+    if (audioRef.current) audioRef.current.srcObject = stream;
+  }, [stream]);
+
   return (
-    <figure className="relative">
-      <p className="absolute bottom-0 right-0 m-2">{user}</p>
+    <figure className={`relative border-2 overflow-hidden rounded-md ${className}`}>
+      <p className="absolute bottom-0 left-0 m-2 font-bold">{user}</p>
+
+      {/* //using the video and audio elements directly */}
       {stream ? (
-        <ReactPlayer url={stream} width="300px" height="300px" playing muted />
+        <>
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            muted
+            className="size-full rounded-md object-cover transform scale-x-[-1]"
+          />
+          <audio ref={audioRef} autoPlay />
+        </>
       ) : (
         <div className="size-[200px] rounded-md bg-orange-300 flex items-center justify-center">
           <BiUser className="icon-lg border-4 rounded-full" />
