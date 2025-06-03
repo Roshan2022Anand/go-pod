@@ -12,7 +12,7 @@ import { HiSpeakerWave } from "react-icons/hi2";
 import { LuScreenShare } from "react-icons/lu";
 
 const Pod = () => {
-  const { roomID, studioID } = useSelector((state: StateT) => state.room);
+  const { roomID } = useSelector((state: StateT) => state.room);
   const { email } = useSelector((state: StateT) => state.user);
   const { remoteStreams, myStream } = useMyContext();
   const { leaveStudio } = useStudio();
@@ -21,12 +21,12 @@ const Pod = () => {
   const columns = count == 1 ? 1 : count <= 3 ? 2 : Math.ceil(count / 2);
 
   const handleCopy = async () => {
-    const cpLink =
-      "http://localhost:5173/studio/" + studioID + "?rID=" + roomID;
+    const currUrl = window.location.href;
+    const cpLink = currUrl + "?rID=" + roomID;
     await navigator.clipboard.writeText(cpLink);
     toast.success("Link copied to clipboard!");
   };
-  console.log(count, columns);
+
   return (
     <main className="grow flex px-2">
       <section className="grow flex flex-col">
