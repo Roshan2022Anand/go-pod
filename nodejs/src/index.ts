@@ -16,7 +16,7 @@ app.use(cookieParser());
 
 app.use(
   cors({
-    origin: env.FRONTEND_URL,
+    origin: process.env.FRONTEND_URL,
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
@@ -30,7 +30,8 @@ app.get("/", (req, res) => {
   res.status(200).json({ msg: "welcome to node server" });
 });
 
-const PORT = env.PORT || 5000;
+const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log("server is runinng on port", PORT);
+  console.log("frontend url is", process.env.FRONTEND_URL);
 });

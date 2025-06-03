@@ -52,10 +52,13 @@ const Pod = () => {
               <Button variant={"prime"}>
                 <LuScreenShare className="icon-md" />
               </Button>
-              <ControlerCamera stream={myStream} />
-              <ControlerMic stream={myStream} />
+              <ControlerCamera stream={myStream} className="bg-btn-hover" />
+              <ControlerMic stream={myStream} className="bg-btn-hover" />
               <Button variant={"prime"} className="h-full" onClick={handleCopy}>
                 <FaCopy className="icon-md" />
+              </Button>
+              <Button variant={"prime"}>
+                <HiSpeakerWave className="icon-md" />
               </Button>
               <Button
                 variant={"prime"}
@@ -63,9 +66,6 @@ const Pod = () => {
                 onClick={leaveStudio}
               >
                 <FcEndCall className="icon-md" />
-              </Button>
-              <Button variant={"prime"}>
-                <HiSpeakerWave className="icon-md" />
               </Button>
             </>
           )}
