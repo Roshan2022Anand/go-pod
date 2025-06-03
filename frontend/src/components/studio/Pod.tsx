@@ -19,6 +19,7 @@ const Pod = () => {
 
   const count = remoteStreams.size + 1;
   const columns = count == 1 ? 1 : count <= 3 ? 2 : Math.ceil(count / 2);
+  const gridCols = `grid-cols-${columns}`;
 
   const handleCopy = async () => {
     const currUrl = window.location.href;
@@ -30,13 +31,12 @@ const Pod = () => {
   return (
     <main className="grow flex px-2">
       <section className="grow flex flex-col">
-        <figure className={`grow p-5 grid grid-cols-${columns} gap-1`}>
+        <figure className={`grow p-5 grid ${gridCols} gap-1`}>
           <Player
             stream={myStream}
             user={email as string}
-            className={`${
-              count % 2 !== 0 ? "row-span-2" : ""
-            } border-2 border-accent`}
+            className={`${count % 2 !== 0 ? "row-span-2" : ""
+              } border-2 border-accent`}
           />
           {Array.from(remoteStreams.entries()).map(([email, stream]) => (
             <Player stream={stream} user={email} key={email} />
