@@ -41,18 +41,19 @@ const Join = () => {
   };
 
   return (
-    <section className="grow flex justify-around items-center">
+    <section className="grow flex justify-center items-center gap-3 px-3">
       {role ? (
         <>
-          <figure className="flex flex-col gap-3">
-            <p>your about to join the pod</p>
-            <p className="flex justify-around items-center py-1 bg-blue-200 rounded-md text-black">
-              {name}{" "}
-              <span className="bg-blue-400 py-1 px-3 rounded-md">{role}</span>
+          <figure className="flex flex-col gap-3 px-3 w-1/2 max-w-[350px]">
+            <p className="text-txt-sec">your about to join the users's pod</p>
+            <h3>Just one step away</h3>
+            <p className="flex justify-between items-center py-2 px-3 gap-3 bg-bg-sec rounded-md">
+              {name}
+              <span className="bg-btn-hover px-2 rounded-md">{role}</span>
             </p>
-            <Button onClick={getMedia}>Allow access</Button>
-            {myStream && (
+            {myStream ? (
               <Button
+                variant={"action"}
                 onClick={() => {
                   if (role == "host") create(studioID);
                   else join(rID);
@@ -60,21 +61,23 @@ const Join = () => {
               >
                 {role == "host" ? "create " : "join "} pod
               </Button>
-            )}
-          </figure>
-          <figure>
-            {myStream ? (
-              <div className="bg-black rounded-md p-2">
-                <Player stream={myStream} user="you" />
-                <div className="flex justify-around">
-                  <ControlerMic stream={myStream} className="" />
-                  <ControlerCamera stream={myStream} className="" />
-                </div>
-              </div>
             ) : (
-              <p>camera setup</p>
+              <Button variant={"prime"} onClick={getMedia}>
+                Allow access
+              </Button>
             )}
           </figure>
+          {myStream ? (
+            <figure className="bg-btn-hover rounded-md p-2 max-w-[400px] max-h-[400px]">
+              <Player stream={myStream} user="you" />
+              <div className="flex justify-around">
+                <ControlerMic stream={myStream} className="my-3" />
+                <ControlerCamera stream={myStream} className="my-3" />
+              </div>
+            </figure>
+          ) : (
+            <p className="text-center w-1/2 max-w-[100px]">camera setup</p>
+          )}
         </>
       ) : (
         <Loading />

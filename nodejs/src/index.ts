@@ -26,6 +26,10 @@ app.use(
 initSocket(server); //initialize the websocket
 app.use("/auth", authRouter); //auth routes
 
+app.get("/", (req, res) => {
+  res.status(200).json({ msg: "welcome to node server" });
+});
+
 const PORT = env.PORT || 5000;
 server.listen(PORT, () => {
   console.log("server is runinng on port", PORT);

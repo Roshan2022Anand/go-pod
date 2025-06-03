@@ -5,31 +5,21 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "rounded-md flex items-center justify-center hover:scale-[0.85]",
+  "rounded-md flex items-center justify-center px-2 py-1 font-bold",
   {
     variants: {
       variant: {
-        default: "",
+        default: "hover:bg-btn-prime",
+        prime: "bg-btn-prime hover:bg-btn-hover",
+        accent: "bg-accent outline-2 -outline-offset-4 hover:outline-offset-0",
+        action: "bg-btn-sec hover:scale-[0.9] text-bg-prime",
         destructive:
-          "bg-destructive text-white shadow-xs hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
-        outline:
-          "border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50",
-        secondary:
-          "bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80",
-        ghost:
-          "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
-        link: "text-primary underline-offset-4 hover:underline",
-      },
-      size: {
-        default: "h-full px-2 py-1",
-        sm: "h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5",
-        lg: "h-10 rounded-md px-6 has-[>svg]:px-4",
-        icon: "size-9",
+          "bg-[#251017] text-[#d43759] hover:bg-red-600 hover:text-txt-prime",
+        link: "text-primary underline-offset-4 hover:underline hover:text-blue-300",
       },
     },
     defaultVariants: {
       variant: "default",
-      size: "default",
     },
   }
 );
@@ -37,7 +27,6 @@ const buttonVariants = cva(
 function Button({
   className,
   variant,
-  size,
   asChild = false,
   ...props
 }: React.ComponentProps<"button"> &
@@ -49,7 +38,7 @@ function Button({
   return (
     <Comp
       data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }))}
+      className={cn(buttonVariants({ variant, className }))}
       {...props}
     />
   );

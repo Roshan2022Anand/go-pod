@@ -19,6 +19,7 @@ const Studio = () => {
   //connect to WS
   useEffect(() => {
     const ws = io(import.meta.env.VITE_NODE_URL);
+    console.log("ws :", import.meta.env.VITE_NODE_URL);
     setSocket(ws);
 
     const onConnect = () => {
@@ -41,7 +42,7 @@ const Studio = () => {
   if (!name || !email) return <Loading />;
 
   return (
-    <main className="h-screen flex flex-col">
+    <main className="bg-bg-prime h-screen flex flex-col">
       <StudioNav />
       {isConnected ? (
         <>{roomID ? <Pod /> : <Join />}</>
@@ -55,11 +56,3 @@ const Studio = () => {
 };
 
 export default Studio;
-
-// https://riverside.fm/studio/roshan-anands-studio-NT4ri?t=df3e553361086a5ce319
-// https://riverside.fm/studio/roshan-anands-studio-NT4ri
-
-/**
-if studioID is not valid, then 404 page
-the studioID is store in DB for any users to access 
- */

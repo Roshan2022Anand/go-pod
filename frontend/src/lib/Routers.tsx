@@ -3,18 +3,26 @@ import {
   createRoute,
   createRootRoute,
 } from "@tanstack/react-router";
-import Landing from "../pages/Landing";
 import Studio from "@/pages/Studio";
 import NotFound from "@/NotFound";
 import Login from "@/pages/Login";
 import Loading from "@/Loading";
+import Home from "../pages/Home";
+import Landing from "@/pages/Landing";
 
 const rootRoute = createRootRoute();
 
-const indexRoute = createRoute({
+const langingRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/",
   component: () => <Landing />,
+  loader: Loading,
+});
+
+const homeRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/dashboard",
+  component: () => <Home />,
   loader: Loading,
 });
 
@@ -31,7 +39,12 @@ const loginRouter = createRoute({
   component: () => <Login />,
 });
 
-const routeTree = rootRoute.addChildren([indexRoute, roomRoute, loginRouter]);
+const routeTree = rootRoute.addChildren([
+  langingRoute,
+  homeRoute,
+  roomRoute,
+  loginRouter,
+]);
 const router = createRouter({
   routeTree,
   defaultNotFoundComponent: NotFound,

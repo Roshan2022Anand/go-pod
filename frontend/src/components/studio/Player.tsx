@@ -19,9 +19,7 @@ const Player = ({
   }, [stream]);
 
   return (
-    <figure className={`relative border-2 overflow-hidden rounded-md ${className}`}>
-      <p className="absolute bottom-0 left-0 m-2 font-bold">{user}</p>
-
+    <figure className={`rounded-md relative  ${className}`}>
       {/* //using the video and audio elements directly */}
       {stream ? (
         <>
@@ -39,6 +37,7 @@ const Player = ({
           <BiUser className="icon-lg border-4 rounded-full" />
         </div>
       )}
+      <p className="absolute bottom-0 m-2 font-bold ">{user}</p>
     </figure>
   );
 };

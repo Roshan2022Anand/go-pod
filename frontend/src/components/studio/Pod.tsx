@@ -13,6 +13,7 @@ import { LuScreenShare } from "react-icons/lu";
 
 const Pod = () => {
   const { roomID, studioID } = useSelector((state: StateT) => state.room);
+  const { email } = useSelector((state: StateT) => state.user);
   const { remoteStreams, myStream } = useMyContext();
   const { leaveStudio } = useStudio();
 
@@ -25,50 +26,55 @@ const Pod = () => {
     await navigator.clipboard.writeText(cpLink);
     toast.success("Link copied to clipboard!");
   };
-
+  console.log(count, columns);
   return (
-    <main className="grow flex flex-col">
-      <section className="grow flex">
-        <figure
-          className={`grow p-5 grid grid-cols-${columns} gap-1`}
-        >
+    <main className="grow flex px-2">
+      <section className="grow flex flex-col">
+        <figure className={`grow p-5 grid grid-cols-${columns} gap-1`}>
           <Player
             stream={myStream}
-            user="one"
-            className={`${count % 2 !== 0 ? "row-span-2" : ""}`}
+            user={email as string}
+            className={`${
+              count % 2 !== 0 ? "row-span-2" : ""
+            } border-2 border-accent`}
           />
           {Array.from(remoteStreams.entries()).map(([email, stream]) => (
             <Player stream={stream} user={email} key={email} />
           ))}
         </figure>
-        <aside className="w-1/4 border-2 flex justify-center items-center">
-          aside
-        </aside>
+        <figure className="mx-auto p-2 rounded-md mb-2 flex gap-3 items-center [&>*]:rounded-full [&>*]:p-3">
+          {myStream && (
+            <>
+              <Button variant={"destructive"} className="flex gap-1">
+                <FaRecordVinyl className="icon-sm" />
+                <div>record</div>
+              </Button>
+              <Button variant={"prime"}>
+                <LuScreenShare className="icon-md" />
+              </Button>
+              <ControlerCamera stream={myStream} />
+              <ControlerMic stream={myStream} />
+              <Button variant={"prime"} className="h-full" onClick={handleCopy}>
+                <FaCopy className="icon-md" />
+              </Button>
+              <Button
+                variant={"prime"}
+                className="h-full"
+                onClick={leaveStudio}
+              >
+                <FcEndCall className="icon-md" />
+              </Button>
+              <Button variant={"prime"}>
+                <HiSpeakerWave className="icon-md" />
+              </Button>
+            </>
+          )}
+        </figure>
       </section>
-      <section className="border-2 mx-auto p-2 rounded-md mb-2 flex gap-3 items-center">
-        {myStream && (
-          <>
-            <Button className="flex gap-1 bg-red-400 ">
-              <FaRecordVinyl className="icon-sm text-red-500" />
-              <div>record</div>
-            </Button>
-            <Button>
-              <LuScreenShare className="icon-md" />
-            </Button>
-            <ControlerCamera stream={myStream} />
-            <ControlerMic stream={myStream} />
-            <Button className="h-full" onClick={handleCopy}>
-              <FaCopy className="icon-md" />
-            </Button>
-            <Button className="h-full" onClick={leaveStudio}>
-              <FcEndCall className="icon-md" />
-            </Button>
-            <Button className="">
-              <HiSpeakerWave className="icon-md" />
-            </Button>
-          </>
-        )}
-      </section>
+
+      <aside className="bg-bg-sec w-1/4 max-w-[200px] m-2 rounded-md flex justify-center items-center">
+        aside
+      </aside>
     </main>
   );
 };
