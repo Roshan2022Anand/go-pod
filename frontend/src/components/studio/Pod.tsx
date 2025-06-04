@@ -10,6 +10,7 @@ import { FaRecordVinyl, FaCopy } from "react-icons/fa";
 import { FcEndCall } from "react-icons/fc";
 import { HiSpeakerWave } from "react-icons/hi2";
 import { LuScreenShare } from "react-icons/lu";
+import clsx from "clsx";
 
 const Pod = () => {
   const { roomID } = useSelector((state: StateT) => state.room);
@@ -19,10 +20,19 @@ const Pod = () => {
 
   const count = remoteStreams.size + 1;
   const columns = count == 1 ? 1 : count <= 3 ? 2 : Math.ceil(count / 2);
-  const gridCols = `grid-cols-${columns}`;
+  const gridCols = clsx({
+    "grid-cols-1": columns === 1,
+    "grid-cols-2": columns === 2,
+    "grid-cols-3": columns === 3,
+    "grid-cols-4": columns >= 4,
+    "grid-cols-5": columns >= 5,
+    "grid-cols-6": columns >= 6,
+    "grid-cols-7": columns >= 7,
+    "grid-cols-8": columns >= 8,
+  });
 
   const handleCopy = async () => {
-    const currUrl = window.location.href;
+    const currUrl = window.location.origin + window.location.pathname;
     const cpLink = currUrl + "?rID=" + roomID;
     await navigator.clipboard.writeText(cpLink);
     toast.success("Link copied to clipboard!");

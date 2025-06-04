@@ -1,8 +1,3 @@
-node :
-	@clear && \
-	cd nodejs && \
-	pnpm dev
-
 go : 
 	@clear && \
 	cd backend && \
@@ -10,7 +5,24 @@ go :
 	go build -o server cmd/main.go && \
 	./server
 
-client :
+dev-client :
 	@clear && \
 	cd frontend && \
 	pnpm dev
+
+dev-server :
+	@clear && \
+	cd nodejs && \
+	pnpm dev
+
+prod-client :
+	@clear && \
+	cd frontend && \
+	pnpm build && \
+	pnpm preview --port 5173 
+
+prod-server :
+	@clear && \
+	cd nodejs && \
+	pnpm build && \
+	pnpm start

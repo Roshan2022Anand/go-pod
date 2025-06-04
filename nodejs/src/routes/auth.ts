@@ -11,6 +11,7 @@ router.post("/login", (req, res) => {
     httpOnly: true,
     secure: process.env.SECURE === "true",
     maxAge: 60 * 60 * 1000,
+    sameSite: "none",
   });
   res.status(200).json({
     msg: "Login successful",
