@@ -1,0 +1,34 @@
+# 1. VCS
+.git
+.gitignore
+
+# 2. Environment files & secrets
+.env
+
+# 3. Local dependencies & build caches
+node_modules
+pnpm-cache
+dist
+
+# 4. Tests, docs, and misc dev files
+**/*.spec.*
+**/*.test.*
+tests/
+README.md
+
+# 5. Editor/IDE configs
+.vscode/
+.idea/
+
+# 6. Logs
+npm-debug.log*
+
+# 7. Other configs 
+eslint.config.js 
+pnpm-workspace.yaml   
+vercel.json
+
+#docker
+Dockerfile
+docker-compose.yml
+.dockerignore

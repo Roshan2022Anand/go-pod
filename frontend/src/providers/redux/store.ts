@@ -1,13 +1,12 @@
 import { configureStore } from "@reduxjs/toolkit";
 import user from "./slice/user";
-// import testUser from "./slice/user.test";
+// import user from "./slice/user.test"; //for test cases
 import room from "./slice/room";
 
 export const store = configureStore({
   reducer: {
     user,
     room,
-    // user: testUser,
   },
 });
 

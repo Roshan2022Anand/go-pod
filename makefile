@@ -18,6 +18,7 @@ dev-server :
 prod-client :
 	@clear && \
 	cd frontend && \
+	pnpm clean && \
 	pnpm build && \
 	pnpm preview --port 5173 
 

@@ -1,0 +1,30 @@
+services:
+  server:
+    image: gopod-s:latest
+    container_name: server
+    ports:
+      - "5000:5000"
+    environment:
+      - FRONTEND_URL=http://localhost:5173
+      - JWT_SECRET=G0_po0i5go0o4-just
+      - COOKIE_SECURE=true     
+      - SECURE=true
+    restart: always
+    networks:
+      - gopod-n
+  client:
+    image: gopod-c:latest
+    container_name: client
+    ports:
+      - "5173:80"
+    environment:
+      - VITE_NODE_URL=http://localhost:5000
+    restart: always
+    networks:
+      - gopod-n
+networks:
+  gopod-n:
+    ipam:
+      driver: default
+      config:
+        - subnet: "172.18.0.0/16"
