@@ -14,6 +14,10 @@ type contextT = {
   setMyStream: Dispatch<SetStateAction<MediaStream | null>>;
   remoteStreams: RemoteStreamT;
   setRemoteStreams: Dispatch<SetStateAction<RemoteStreamT>>;
+  audioOpt: MediaDeviceInfo[];
+  setAudioOpt: Dispatch<SetStateAction<MediaDeviceInfo[]>>;
+  videoOpt: MediaDeviceInfo[];
+  setVideoOpt: Dispatch<SetStateAction<MediaDeviceInfo[]>>;
 };
 
 export const MyContext = createContext<contextT>({
@@ -23,6 +27,10 @@ export const MyContext = createContext<contextT>({
   setMyStream: () => {},
   remoteStreams: new Map(),
   setRemoteStreams: () => {},
+  audioOpt: [],
+  setAudioOpt: () => {},
+  videoOpt: [],
+  setVideoOpt: () => {},
 });
 
 export const useMyContext = () => {

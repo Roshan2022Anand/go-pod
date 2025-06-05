@@ -22,6 +22,6 @@ COPY --from=builder /server/pnpm-lock.yaml ./pnpm-lock.yaml
 RUN npm install -g pnpm
 RUN pnpm install --prod
 
-EXPOSE 50000
+EXPOSE 5000
 
 ENTRYPOINT [ "pnpm","start" ]

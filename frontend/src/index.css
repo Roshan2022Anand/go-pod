@@ -68,6 +68,15 @@ p {
   max-width: 65ch;
 }
 
+.sm-elips-txt {
+  font-size: clamp(0.875rem, 0.8rem + 0.2vw, 1rem);
+  line-height: 1.5;
+  max-width: 37ch;
+  white-space: nowrap;     
+  overflow: hidden;
+  text-overflow: ellipsis; 
+}
+
 .icon-lg {
   width: clamp(2.5rem, 1.5rem + 3vw, 4rem);
   height: clamp(2.5rem, 1.5rem + 3vw, 4rem);
@@ -81,4 +90,14 @@ p {
 .icon-sm {
   width: clamp(1.25rem, 0.8rem + 1vw, 1.75rem);
   height: clamp(1.25rem, 0.8rem + 1vw, 1.75rem);
+}
+
+select {
+  padding: 0.5rem;
+  border: 1px solid var(--color-txt-prime);
+
+  &>*{
+    width: 10px;
+    border-radius: 10px;
+  }
 }

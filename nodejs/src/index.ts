@@ -33,5 +33,4 @@ app.get("/", (req, res) => {
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log("server is runinng on port", PORT);
-  console.log("frontend url is", process.env.FRONTEND_URL);
 });

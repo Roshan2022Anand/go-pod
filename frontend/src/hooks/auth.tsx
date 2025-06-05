@@ -24,13 +24,12 @@ const useAuth = () => {
     if (email && name) return;
 
     //to navigate to
-    // 
+    //
     //  login and redirect to previous page
     const redirect = () => {
       if (path !== "/login") {
         let query = "";
         if (path.includes("studio")) query = "?rID=" + search.rID;
-        console.log("back to ", path + query);
         navigate({
           to: "/login",
           search: {
@@ -62,6 +61,6 @@ const useAuth = () => {
       }
     };
     checkAuth();
-  }, [dispatch, email, name, path, navigate]);
+  }, [dispatch, email, name, path, navigate, search.rID]);
 };
 export default useAuth;

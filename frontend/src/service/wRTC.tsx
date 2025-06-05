@@ -148,7 +148,6 @@ const useWrtcService = (
     socket.on(
       "sdp:received",
       ({ email, sdp }: { email: string; sdp: RTCSessionDescriptionInit }) => {
-        console.log("sdp:recived", email, sdp.type);
         if (sdp.type === "offer") handleOffer(email, sdp);
         else handleAns(email, sdp);
       }

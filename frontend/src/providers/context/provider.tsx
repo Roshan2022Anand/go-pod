@@ -9,9 +9,10 @@ const ContextProvider = ({ children }: { children: React.ReactNode }) => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [myStream, setMyStream] = useState<MediaStream | null>(null);
   const [remoteStreams, setRemoteStreams] = useState<RemoteStreamT>(new Map());
+  const [audioOpt, setAudioOpt] = useState<MediaDeviceInfo[]>([]);
+  const [videoOpt, setVideoOpt] = useState<MediaDeviceInfo[]>([]);
 
   useWrtcService(socket, myStream, setRemoteStreams);
-
   return (
     <MyContext.Provider
       value={{
@@ -21,6 +22,10 @@ const ContextProvider = ({ children }: { children: React.ReactNode }) => {
         setMyStream,
         remoteStreams,
         setRemoteStreams,
+        audioOpt,
+        setAudioOpt,
+        videoOpt,
+        setVideoOpt,
       }}
     >
       {children}

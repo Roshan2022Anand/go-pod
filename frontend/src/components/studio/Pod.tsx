@@ -2,18 +2,16 @@ import { useSelector } from "react-redux";
 import type { StateT } from "../../providers/redux/store";
 import { useMyContext } from "../../providers/context/config";
 import Player from "./Player";
-import { ControlerCamera, ControlerMic } from "./MediaUtils";
+import { ControlerCamera, ControlerMic, ControlerSpeaker } from "./MediaUtils";
 import { Button } from "../ui/button";
-import { toast } from "react-toastify";
 import useStudio from "@/hooks/studio";
-import { FaRecordVinyl, FaCopy } from "react-icons/fa";
+import { FaRecordVinyl } from "react-icons/fa";
 import { FcEndCall } from "react-icons/fc";
-import { HiSpeakerWave } from "react-icons/hi2";
 import { LuScreenShare } from "react-icons/lu";
 import clsx from "clsx";
+import SideBar from "./SideBar";
 
 const Pod = () => {
-  const { roomID } = useSelector((state: StateT) => state.room);
   const { email } = useSelector((state: StateT) => state.user);
   const { remoteStreams, myStream } = useMyContext();
   const { leaveStudio } = useStudio();
@@ -31,13 +29,6 @@ const Pod = () => {
     "grid-cols-8": columns >= 8,
   });
 
-  const handleCopy = async () => {
-    const currUrl = window.location.origin + window.location.pathname;
-    const cpLink = currUrl + "?rID=" + roomID;
-    await navigator.clipboard.writeText(cpLink);
-    toast.success("Link copied to clipboard!");
-  };
-
   return (
     <main className="grow flex px-2">
       <section className="grow flex flex-col">
@@ -45,8 +36,9 @@ const Pod = () => {
           <Player
             stream={myStream}
             user={email as string}
-            className={`${count % 2 !== 0 ? "row-span-2" : ""
-              } border-2 border-accent`}
+            className={`${
+              count % 2 !== 0 ? "row-span-2" : ""
+            } border-2 border-accent`}
           />
           {Array.from(remoteStreams.entries()).map(([email, stream]) => (
             <Player stream={stream} user={email} key={email} />
@@ -64,12 +56,8 @@ const Pod = () => {
               </Button>
               <ControlerCamera stream={myStream} className="bg-btn-hover" />
               <ControlerMic stream={myStream} className="bg-btn-hover" />
-              <Button variant={"prime"} className="h-full" onClick={handleCopy}>
-                <FaCopy className="icon-md" />
-              </Button>
-              <Button variant={"prime"}>
-                <HiSpeakerWave className="icon-md" />
-              </Button>
+              <ControlerSpeaker />
+
               <Button
                 variant={"prime"}
                 className="h-full"
@@ -81,10 +69,7 @@ const Pod = () => {
           )}
         </figure>
       </section>
-
-      <aside className="bg-bg-sec w-1/4 max-w-[200px] m-2 rounded-md flex justify-center items-center">
-        aside
-      </aside>
+      <SideBar />
     </main>
   );
 };

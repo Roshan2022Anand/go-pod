@@ -19,7 +19,6 @@ const Studio = () => {
   //connect to WS
   useEffect(() => {
     const ws = io(import.meta.env.VITE_NODE_URL);
-    console.log("ws :", import.meta.env.VITE_NODE_URL);
     setSocket(ws);
 
     const onConnect = () => {

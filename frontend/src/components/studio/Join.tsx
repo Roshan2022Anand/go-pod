@@ -3,42 +3,41 @@ import useRoomService from "../../service/room";
 import { useMyContext } from "../../providers/context/config";
 import Player from "./Player";
 import { Button } from "../ui/button";
-import { ControlerCamera, ControlerMic } from "./MediaUtils";
+import { SetupMedia } from "./MediaUtils";
 import { useNavigate, useParams, useSearch } from "@tanstack/react-router";
 import { CheckStudioID } from "@/lib/genrator";
 import { setPodRole, setStudioId } from "@/providers/redux/slice/room";
 import { useDispatch, useSelector } from "react-redux";
 import type { StateT } from "@/providers/redux/store";
 import Loading from "@/Loading";
+import useMedia from "@/hooks/Media";
+
 const Join = () => {
+  //context call
+  const { myStream } = useMyContext();
+
+  //redux call
+  const { email, name } = useSelector((state: StateT) => state.user);
+  const { role } = useSelector((state: StateT) => state.room);
+
+  //hooks call
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { create, join, checkRoom } = useRoomService();
-  const { setMyStream, myStream } = useMyContext();
-  const { email, name } = useSelector((state: StateT) => state.user);
-  const { role } = useSelector((state: StateT) => state.room);
+  const { getMedia } = useMedia();
 
   //to validate client's authorization in the pod
   const { studioID } = useParams({ from: "/studio/$studioID" });
   const { rID } = useSearch({ from: "/studio/$studioID" }) as { rID: string };
   useEffect(() => {
     if (!email) return;
-    console.log(studioID, rID, email);
+
     if (CheckStudioID(studioID, email)) {
       dispatch(setStudioId(studioID));
       dispatch(setPodRole("host"));
     } else if (rID) checkRoom(rID, studioID);
     else navigate({ to: "/" });
   }, [studioID, checkRoom, email, dispatch, navigate, rID]);
-
-  //to access user's media stream
-  const getMedia = async () => {
-    const media = await navigator.mediaDevices.getUserMedia({
-      audio: true,
-      video: true,
-    });
-    setMyStream(media);
-  };
 
   return (
     <section className="grow flex justify-center items-center gap-3 px-3">
@@ -68,12 +67,9 @@ const Join = () => {
             )}
           </figure>
           {myStream ? (
-            <figure className="bg-btn-hover rounded-md p-2 max-w-[400px] max-h-[400px]">
+            <figure className="bg-btn-hover rounded-md p-2 w-1/2 max-w-[350px]">
               <Player stream={myStream} user="you" />
-              <div className="flex justify-around">
-                <ControlerMic stream={myStream} className="my-3" />
-                <ControlerCamera stream={myStream} className="my-3" />
-              </div>
+              <SetupMedia stream={myStream} />
             </figure>
           ) : (
             <p className="text-center w-1/2 max-w-[100px]">camera setup</p>
