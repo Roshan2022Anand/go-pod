@@ -10,10 +10,12 @@ const useStudio = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { roomID } = useSelector((state: StateT) => state.room);
-  const { myStream, setMyStream } = useMyContext();
+  const { myScreen, myStream, setMyStream } = useMyContext();
 
   const leaveStudio = () => {
     if (roomID) dispatch(setRoomId(null));
+
+    //stop the local stream
     if (myStream) {
       myStream.getTracks().forEach((track) => {
         track.stop();
@@ -26,7 +28,15 @@ const useStudio = () => {
         peers.delete(i);
       }
     }
-    navigate({ to: "/" });
+
+    //disconnect the screen share
+    if (myScreen) {
+      myScreen.getTracks().forEach((track) => {
+        track.stop();
+      });
+      setMyStream(null);
+    }
+    navigate({ to: "/dashboard" });
   };
 
   return { leaveStudio };

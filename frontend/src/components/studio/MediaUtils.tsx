@@ -1,8 +1,5 @@
-import { FaMicrophone, FaMicrophoneSlash } from "react-icons/fa";
 import { Button } from "../ui/button";
 import { useState } from "react";
-import { BsCameraVideoFill, BsCameraVideoOffFill } from "react-icons/bs";
-import { HiSpeakerWave, HiSpeakerXMark } from "react-icons/hi2";
 import { useMyContext } from "@/providers/context/config";
 import {
   Select,
@@ -11,7 +8,12 @@ import {
   SelectItem,
   SelectContent,
 } from "../ui/select";
+import { FaMicrophone, FaMicrophoneSlash } from "react-icons/fa";
+import { BsCameraVideoFill, BsCameraVideoOffFill } from "react-icons/bs";
+import { HiSpeakerWave, HiSpeakerXMark } from "react-icons/hi2";
+import { LuScreenShare } from "react-icons/lu";
 
+//to show available audio and video devices and allow user to select them
 const SetupMedia = ({ stream }: { stream: MediaStream }) => {
   const { audioOpt, videoOpt, setMyStream } = useMyContext();
 
@@ -85,6 +87,7 @@ const SetupMedia = ({ stream }: { stream: MediaStream }) => {
   );
 };
 
+//to give control over mic to enable/disable it
 const ControlerMic = ({
   stream,
   className,
@@ -115,6 +118,7 @@ const ControlerMic = ({
   );
 };
 
+//to give control over camera to enable/disable it
 const ControlerCamera = ({
   stream,
   className,
@@ -122,7 +126,6 @@ const ControlerCamera = ({
   stream: MediaStream;
   className?: string;
 }) => {
-
   const [isEnabled, setIsEnabled] = useState(
     stream.getVideoTracks()[0].enabled
   );
@@ -146,6 +149,7 @@ const ControlerCamera = ({
   );
 };
 
+//to give control over speaker to enable/disable it
 const ControlerSpeaker = ({ className }: { className?: string }) => {
   const [isEnabled, setIsEnabled] = useState(true);
   return (
@@ -165,4 +169,33 @@ const ControlerSpeaker = ({ className }: { className?: string }) => {
   );
 };
 
-export { ControlerMic, ControlerCamera, ControlerSpeaker, SetupMedia };
+//to give control over screen share
+const ControlerScreenShare = () => {
+  const { setMyScreen } = useMyContext();
+
+  const handleScreenShare = async () => {
+    const stream = await navigator.mediaDevices.getDisplayMedia({
+      video: true,
+    });
+
+    
+    setMyScreen(stream);
+    stream.getVideoTracks()[0].addEventListener("ended", () => {
+      setMyScreen(null);
+    });
+  };
+
+  return (
+    <Button variant={"prime"} onClick={handleScreenShare}>
+      <LuScreenShare className="icon-md" />
+    </Button>
+  );
+};
+
+export {
+  ControlerMic,
+  ControlerCamera,
+  ControlerSpeaker,
+  ControlerScreenShare,
+  SetupMedia,
+};

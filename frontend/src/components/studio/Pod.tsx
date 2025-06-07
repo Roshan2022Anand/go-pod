@@ -2,18 +2,22 @@ import { useSelector } from "react-redux";
 import type { StateT } from "../../providers/redux/store";
 import { useMyContext } from "../../providers/context/config";
 import Player from "./Player";
-import { ControlerCamera, ControlerMic, ControlerSpeaker } from "./MediaUtils";
+import {
+  ControlerCamera,
+  ControlerMic,
+  ControlerScreenShare,
+  ControlerSpeaker,
+} from "./MediaUtils";
 import { Button } from "../ui/button";
 import useStudio from "@/hooks/studio";
 import { FaRecordVinyl } from "react-icons/fa";
 import { FcEndCall } from "react-icons/fc";
-import { LuScreenShare } from "react-icons/lu";
 import clsx from "clsx";
 import SideBar from "./SideBar";
 
 const Pod = () => {
-  const { email } = useSelector((state: StateT) => state.user);
-  const { remoteStreams, myStream } = useMyContext();
+  const { email, name } = useSelector((state: StateT) => state.user);
+  const { remoteStreams, myStream, myScreen } = useMyContext();
   const { leaveStudio } = useStudio();
 
   const count = remoteStreams.size + 1;
@@ -40,6 +44,13 @@ const Pod = () => {
               count % 2 !== 0 ? "row-span-2" : ""
             } border-2 border-accent`}
           />
+          {myScreen && (
+            <Player
+              stream={myScreen}
+              vdCls="scale-x-[1]"
+              user={`${name} (screen)`}
+            />
+          )}
           {Array.from(remoteStreams.entries()).map(([email, stream]) => (
             <Player stream={stream} user={email} key={email} />
           ))}
@@ -51,9 +62,7 @@ const Pod = () => {
                 <FaRecordVinyl className="icon-sm" />
                 <div>record</div>
               </Button>
-              <Button variant={"prime"}>
-                <LuScreenShare className="icon-md" />
-              </Button>
+              <ControlerScreenShare />
               <ControlerCamera stream={myStream} className="bg-btn-hover" />
               <ControlerMic stream={myStream} className="bg-btn-hover" />
               <ControlerSpeaker />

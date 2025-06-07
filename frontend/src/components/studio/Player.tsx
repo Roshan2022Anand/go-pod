@@ -5,10 +5,12 @@ const Player = ({
   stream,
   user,
   className,
+  vdCls,
 }: {
   stream: MediaStream | null;
   user: string;
   className?: string;
+  vdCls?: string;
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -20,7 +22,7 @@ const Player = ({
 
   return (
     <figure className={`rounded-md relative  ${className}`}>
-      {/* //using the video and audio elements directly */}
+      {/* using the video and audio elements directly */}
       {stream ? (
         <>
           <video
@@ -28,7 +30,7 @@ const Player = ({
             autoPlay
             playsInline
             muted
-            className="size-full rounded-md object-cover transform scale-x-[-1]"
+            className={`size-full rounded-md object-cover transform scale-x-[-1] ${vdCls}`}
           />
           <audio ref={audioRef} autoPlay />
         </>

@@ -18,6 +18,8 @@ type contextT = {
   setAudioOpt: Dispatch<SetStateAction<MediaDeviceInfo[]>>;
   videoOpt: MediaDeviceInfo[];
   setVideoOpt: Dispatch<SetStateAction<MediaDeviceInfo[]>>;
+  myScreen: MediaStream | null;
+  setMyScreen: Dispatch<SetStateAction<MediaStream | null>>;
 };
 
 export const MyContext = createContext<contextT>({
@@ -31,6 +33,8 @@ export const MyContext = createContext<contextT>({
   setAudioOpt: () => {},
   videoOpt: [],
   setVideoOpt: () => {},
+  myScreen: null,
+  setMyScreen: () => {},
 });
 
 export const useMyContext = () => {

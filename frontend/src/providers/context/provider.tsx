@@ -8,6 +8,7 @@ import type { RemoteStreamT } from "../../lib/Type";
 const ContextProvider = ({ children }: { children: React.ReactNode }) => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [myStream, setMyStream] = useState<MediaStream | null>(null);
+  const [myScreen, setMyScreen] = useState<MediaStream | null>(null);
   const [remoteStreams, setRemoteStreams] = useState<RemoteStreamT>(new Map());
   const [audioOpt, setAudioOpt] = useState<MediaDeviceInfo[]>([]);
   const [videoOpt, setVideoOpt] = useState<MediaDeviceInfo[]>([]);
@@ -26,6 +27,8 @@ const ContextProvider = ({ children }: { children: React.ReactNode }) => {
         setAudioOpt,
         videoOpt,
         setVideoOpt,
+        myScreen,
+        setMyScreen,
       }}
     >
       {children}
