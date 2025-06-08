@@ -154,7 +154,7 @@ const ControlerSpeaker = ({ className }: { className?: string }) => {
   const [isEnabled, setIsEnabled] = useState(true);
   return (
     <Button
-      className={`h-full ${className || ""}`}
+      className={className}
       variant={"prime"}
       onClick={() => {
         setIsEnabled(!isEnabled);
@@ -178,7 +178,6 @@ const ControlerScreenShare = () => {
       video: true,
     });
 
-    
     setMyScreen(stream);
     stream.getVideoTracks()[0].addEventListener("ended", () => {
       setMyScreen(null);

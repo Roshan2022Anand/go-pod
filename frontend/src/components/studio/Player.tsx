@@ -21,7 +21,7 @@ const Player = ({
   }, [stream]);
 
   return (
-    <figure className={`rounded-md relative  ${className}`}>
+    <figure className={`rounded-md relative overflow-hidden ${className}`}>
       {/* using the video and audio elements directly */}
       {stream ? (
         <>
@@ -30,7 +30,7 @@ const Player = ({
             autoPlay
             playsInline
             muted
-            className={`size-full rounded-md object-cover transform scale-x-[-1] ${vdCls}`}
+            className={`size-full  rounded-md object-cover transform scale-x-[-1] ${vdCls}`}
           />
           <audio ref={audioRef} autoPlay />
         </>

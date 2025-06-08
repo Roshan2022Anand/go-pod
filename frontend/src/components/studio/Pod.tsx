@@ -34,9 +34,9 @@ const Pod = () => {
   });
 
   return (
-    <main className="grow flex px-2">
-      <section className="grow flex flex-col">
-        <figure className={`grow p-5 grid ${gridCols} gap-1`}>
+    <main className="grow max-h-[95vh] flex px-2 ">
+      <section className="grow flex flex-col gap-2">
+        <figure className={`grow max-h-[90%] p-5 grid  gap-1 ${gridCols}`}>
           <Player
             stream={myStream}
             user={email as string}
@@ -55,7 +55,7 @@ const Pod = () => {
             <Player stream={stream} user={email} key={email} />
           ))}
         </figure>
-        <figure className="mx-auto p-2 rounded-md mb-2 flex gap-3 items-center [&>*]:rounded-full [&>*]:p-3">
+        <figure className="h-[10%] mx-auto rounded-md mb-2 flex gap-3 items-center [&>*]:rounded-full [&>*]:p-3">
           {myStream && (
             <>
               <Button variant={"destructive"} className="flex gap-1">
@@ -69,7 +69,6 @@ const Pod = () => {
 
               <Button
                 variant={"prime"}
-                className="h-full"
                 onClick={leaveStudio}
               >
                 <FcEndCall className="icon-md" />
