@@ -3,32 +3,33 @@ import type { StateT } from "../providers/redux/store";
 import { useEffect } from "react";
 import { toast } from "react-toastify";
 import { setPodRole, setRoomId } from "../providers/redux/slice/room";
-import { useMyContext } from "../providers/context/config";
 import { useNavigate } from "@tanstack/react-router";
+import { useWsContext } from "@/providers/context/socket/config";
+import type { WsData } from "@/lib/Type";
 
 //handles all the room emit and listen event's
 const useRoomService = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { socket } = useMyContext();
   const { email, name } = useSelector((state: StateT) => state.user);
+  const { listeners, wsOn, wsOff, wsEmit, socket } = useWsContext();
 
   // to listen all the incomming room event's
   useEffect(() => {
     if (!socket) return;
-    if (socket.hasListeners("room:created")) return;
+    if (listeners.has("room:created")) return;
 
-    socket.on("room:created", ({ roomID }) => {
+    wsOn("room:created", (roomID) => {
       toast.success("Pod created succefully");
       dispatch(setRoomId(roomID));
     });
 
-    socket.on("room:joined", ({ roomID }) => {
+    wsOn("room:joined", (roomID) => {
       toast.success("Pod created succefully");
       dispatch(setRoomId(roomID));
     });
 
-    socket.on("room:checked", ({ exist }) => {
+    wsOn("room:checked", (exist) => {
       if (exist) {
         toast.success("you one step closer to join the pod");
         dispatch(setPodRole("guest"));
@@ -39,28 +40,41 @@ const useRoomService = () => {
     });
 
     return () => {
-      socket.off("room:created");
-      socket.off("room:joined");
-      socket.off("room:checked");
+      wsOff("room:created");
+      wsOff("room:joined");
+      wsOff("room:checked");
     };
-  }, [socket, dispatch, navigate]);
+  }, [wsOn, wsOff, dispatch, navigate, socket, listeners]);
 
   //to emit create room
   const create = (studioID: string) => {
-    if (!socket) return;
-    socket.emit("create:room", { studioID, email, name });
+    if (!email || !name) return;
+    const payload: WsData = {
+      studioID,
+      email,
+      name,
+    };
+    wsEmit("create:room", payload);
   };
 
   //to emit join room
   const join = (roomID: string) => {
-    if (!socket) return;
-    socket.emit("join:room", { roomID, email, name });
+    if (!email || !name) return;
+    const payload: WsData = {
+      roomID,
+      email,
+      name,
+    };
+    wsEmit("join:room", payload);
   };
 
   //to emit check room
   const checkRoom = (roomID: string, studioID: string) => {
-    if (!socket) return;
-    socket.emit("check:room", { roomID, studioID });
+    const payload: WsData = {
+      roomID,
+      studioID,
+    };
+    wsEmit("check:room", payload);
   };
 
   return { create, join, checkRoom };

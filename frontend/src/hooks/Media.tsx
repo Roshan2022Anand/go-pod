@@ -1,7 +1,7 @@
-import { useMyContext } from "@/providers/context/config";
+import { useWrtcContext} from "@/providers/context/wRTC/config";
 
 const useMedia = () => {
-  const { setMyStream, setAudioOpt, setVideoOpt } = useMyContext();
+  const { setMyStream, setAudioOpt, setVideoOpt } = useWrtcContext();
 
   //to access user's media stream
   const getMedia = async () => {

@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"net/http"
-	"os"
 
 	"github.com/Roshan-anand/go-pod/internal/socket"
 	"github.com/joho/godotenv"
@@ -24,11 +23,11 @@ func main() {
 	})
 
 	mux.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+		socket.ServerWs(hub, w, r)
 	})
 
-	port := os.Getenv("PORT")
-	fmt.Println("Server is running on http://localhost:" + port)
-	if err := http.ListenAndServe(":"+port, mux); err != nil {
+	fmt.Println("Server is running on port 8080")
+	if err := http.ListenAndServe(":8080", mux); err != nil {
 		panic(err)
 	}
 }

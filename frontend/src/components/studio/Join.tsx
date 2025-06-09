@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import useRoomService from "../../service/room";
-import { useMyContext } from "../../providers/context/config";
+import { useWrtcContext } from "../../providers/context/wRTC/config";
 import Player from "./Player";
 import { Button } from "../ui/button";
 import { SetupMedia } from "./MediaUtils";
@@ -14,7 +14,7 @@ import useMedia from "@/hooks/Media";
 
 const Join = () => {
   //context call
-  const { myStream } = useMyContext();
+  const { myStream } = useWrtcContext();
 
   //redux call
   const { email, name } = useSelector((state: StateT) => state.user);

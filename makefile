@@ -1,4 +1,4 @@
-go : 
+server : 
 	@clear && \
 	cd backend && \
 	go mod tidy && \
@@ -10,20 +10,9 @@ dev-client :
 	cd frontend && \
 	pnpm dev
 
-dev-server :
-	@clear && \
-	cd nodejs && \
-	pnpm dev
-
 prod-client :
 	@clear && \
 	cd frontend && \
 	pnpm clean && \
 	pnpm build && \
 	pnpm preview --port 5173 
-
-prod-server :
-	@clear && \
-	cd nodejs && \
-	pnpm build && \
-	pnpm start

@@ -1,6 +1,6 @@
 import { Button } from "../ui/button";
 import { useState } from "react";
-import { useMyContext } from "@/providers/context/config";
+import { useWrtcContext } from "@/providers/context/wRTC/config";
 import {
   Select,
   SelectTrigger,
@@ -15,7 +15,7 @@ import { LuScreenShare } from "react-icons/lu";
 
 //to show available audio and video devices and allow user to select them
 const SetupMedia = ({ stream }: { stream: MediaStream }) => {
-  const { audioOpt, videoOpt, setMyStream } = useMyContext();
+  const { audioOpt, videoOpt, setMyStream } = useWrtcContext();
 
   //to set the new selected audio track
   const handleAudioChange = async (deviceId: string) => {
@@ -171,7 +171,7 @@ const ControlerSpeaker = ({ className }: { className?: string }) => {
 
 //to give control over screen share
 const ControlerScreenShare = () => {
-  const { setMyScreen } = useMyContext();
+  const { setMyScreen } = useWrtcContext();
 
   const handleScreenShare = async () => {
     const stream = await navigator.mediaDevices.getDisplayMedia({

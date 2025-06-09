@@ -1,6 +1,6 @@
 import { useSelector } from "react-redux";
 import type { StateT } from "../../providers/redux/store";
-import { useMyContext } from "../../providers/context/config";
+import { useWrtcContext } from "../../providers/context/wRTC/config";
 import Player from "./Player";
 import {
   ControlerCamera,
@@ -17,7 +17,7 @@ import SideBar from "./SideBar";
 
 const Pod = () => {
   const { email, name } = useSelector((state: StateT) => state.user);
-  const { remoteStreams, myStream, myScreen } = useMyContext();
+  const { remoteStreams, myStream, myScreen } = useWrtcContext();
   const { leaveStudio } = useStudio();
 
   const count = remoteStreams.size + 1;
@@ -67,10 +67,7 @@ const Pod = () => {
               <ControlerMic stream={myStream} className="bg-btn-hover" />
               <ControlerSpeaker />
 
-              <Button
-                variant={"prime"}
-                onClick={leaveStudio}
-              >
+              <Button variant={"prime"} onClick={leaveStudio}>
                 <FcEndCall className="icon-md" />
               </Button>
             </>

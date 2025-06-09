@@ -1,6 +1,9 @@
 package socket
 
-import "sync"
+import (
+	"fmt"
+	"sync"
+)
 
 type Hub struct {
 	client     map[*Client]bool
@@ -23,10 +26,12 @@ func (h *Hub) Run() {
 		case c := <-h.register:
 			h.mu.Lock()
 			h.client[c] = true
+			fmt.Println("client connected", c.conn.RemoteAddr())
 			h.mu.Unlock()
 		case c := <-h.unregister:
 			h.mu.Lock()
 			delete(h.client, c)
+			fmt.Println("client disconnected", c.conn.RemoteAddr())
 			h.mu.Unlock()
 		}
 	}
