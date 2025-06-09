@@ -4,32 +4,31 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"server/internal/config/socket"
 
+	"github.com/Roshan-anand/go-pod/internal/socket"
 	"github.com/joho/godotenv"
-	"github.com/rs/cors"
 )
 
 func main() {
 	godotenv.Load()
-	mux := http.NewServeMux()
 
-	// to config the socket hub
 	hub := socket.NewHub()
 	go hub.Run()
 
-	//cors to allow all origins
-	handler := cors.New(cors.Options{
-		AllowedOrigins:   []string{os.Getenv("FRONTEND_URL")},
-		AllowCredentials: true,
-	}).Handler(mux)
+	mux := http.NewServeMux()
 
-	mux.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
-		socket.ServeWs(hub, w, r)
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/plain")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("Hello, World!"))
 	})
 
-	fmt.Println("Starting server on :8080")
-	if err := http.ListenAndServe(":8080", handler); err != nil {
+	mux.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+	})
+
+	port := os.Getenv("PORT")
+	fmt.Println("Server is running on http://localhost:" + port)
+	if err := http.ListenAndServe(":"+port, mux); err != nil {
 		panic(err)
 	}
 }
