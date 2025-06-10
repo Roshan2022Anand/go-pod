@@ -5,10 +5,16 @@ import (
 	"sync"
 )
 
+type studio struct {
+	name string
+	clients map[string]*Client
+}
+
 type Hub struct {
 	client     map[*Client]bool
 	register   chan *Client
 	unregister chan *Client
+	studios    map[string]*studio
 	mu         sync.Mutex
 }
 
@@ -17,6 +23,7 @@ func NewHub() *Hub {
 		client:     make(map[*Client]bool),
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
+		studios:    make(map[string]*studio),
 	}
 }
 

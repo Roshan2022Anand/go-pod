@@ -9,11 +9,19 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+type WsData map[string]string
+type WsEv struct {
+	Event string `json:"event"`
+	Data  WsData `json:"data"`
+}
+
 // represents a client
 type Client struct {
-	hub  *Hub
-	conn *websocket.Conn
-	send chan []byte
+	hub   *Hub
+	conn  *websocket.Conn
+	send  chan []byte
+	name  string
+	email string
 }
 
 // it reads the incomming msg from the client
@@ -37,15 +45,26 @@ func (c *Client) readPump() {
 		}
 
 		//unmarshal the msg
-		var evMsg interface{}
+		var evMsg WsEv
 		err = json.Unmarshal(msg, &evMsg)
 		if err != nil {
 			log.Printf("error while unmarshalling message: %v", err)
 			continue
 		}
 
-		fmt.Println("Received message:", evMsg)
-		c.send <- []byte("hai from server")
+		switch evMsg.Event {
+		case "create:room":
+			c.createRoom(evMsg.Data)
+		case "join:room":
+			c.joinRoom(evMsg.Data)
+		case "check:room":
+			c.checkRoom(evMsg.Data)
+		case "test":
+			c.send <- msg
+		default:
+			fmt.Println("other event received:", evMsg.Event)
+		}
+
 	}
 
 }
@@ -69,7 +88,13 @@ func (c *Client) writePump() {
 			if err != nil {
 				return
 			}
+			fmt.Println("sending ", string(msg), " to ", c.conn.RemoteAddr())
 			w.Write(msg)
+
+			if err = w.Close(); err != nil {
+				log.Printf("error while closing writer: %v", err)
+				return
+			}
 		}
 	}
 }
@@ -96,6 +121,6 @@ func ServerWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256)}
 	client.hub.register <- client
 
-	// go client.writePump()
+	go client.writePump()
 	go client.readPump()
 }
