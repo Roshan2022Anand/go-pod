@@ -1,4 +1,4 @@
-import type { WsData } from "@/lib/Type";
+import type { wsEvent } from "@/lib/Type";
 import {
   createContext,
   useContext,
@@ -9,19 +9,13 @@ import {
 type contextT = {
   socket: WebSocket | null;
   setSocket: Dispatch<SetStateAction<WebSocket | null>>;
-  wsOn: (event: string, callback: (...args: string[]) => void) => void;
-  wsOff: (event: string) => void;
-  wsEmit: (event: string, data: WsData) => void;
-  listeners: Map<string, () => void>;
+  WsEmit: (data: wsEvent) => void;
 };
 
 export const WsContext = createContext<contextT>({
   socket: null,
   setSocket: () => {},
-  wsOn: () => {},
-  wsOff: () => {},
-  wsEmit: () => {},
-  listeners: new Map(),
+  WsEmit: () => {},
 });
 
 export const useWsContext = () => {

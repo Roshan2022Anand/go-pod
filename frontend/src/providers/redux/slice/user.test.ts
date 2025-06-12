@@ -1,4 +1,4 @@
-import { generateID } from "@/lib/genrator";
+import { generateID } from "@/lib/utils";
 import { createSlice } from "@reduxjs/toolkit";
 
 type UserState = {
@@ -9,7 +9,7 @@ type UserState = {
 
 const initialState: UserState = {
   name: "user_" + generateID(2),
-  email: generateID(3) + "@gamil.com",
+  email: generateID(3) + "@gmail.com",
   pic: null,
 };
 

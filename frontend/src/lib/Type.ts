@@ -1,4 +1,4 @@
-type WsVal = string | number | RTCSessionDescriptionInit;
+type WsVal = string | number | RTCSessionDescriptionInit |RTCIceCandidate | null;
 
 export type WsData = Record<string, WsVal>;
 
@@ -8,4 +8,3 @@ export type wsEvent = {
 };
 
 export type RemoteStreamT = Map<string, MediaStream>;
-export type PeersT = Map<string, RTCPeerConnection>;

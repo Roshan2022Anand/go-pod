@@ -66,7 +66,6 @@ const Pod = () => {
               <ControlerCamera stream={myStream} className="bg-btn-hover" />
               <ControlerMic stream={myStream} className="bg-btn-hover" />
               <ControlerSpeaker />
-
               <Button variant={"prime"} onClick={leaveStudio}>
                 <FcEndCall className="icon-md" />
               </Button>

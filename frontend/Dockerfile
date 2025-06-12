@@ -10,8 +10,7 @@ RUN npm install -g pnpm
 RUN pnpm install
 
 COPY . .
-RUN pnpm clean && \
-    pnpm build
+RUN pnpm build
 
 FROM nginx:latest AS runner
 

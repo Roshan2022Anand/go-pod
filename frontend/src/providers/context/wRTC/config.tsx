@@ -7,6 +7,8 @@ import {
 import type { RemoteStreamT } from "../../../lib/Type";
 
 type contextT = {
+  peerC: RTCPeerConnection | null;
+  setPeerC: Dispatch<SetStateAction<RTCPeerConnection | null>>;
   myStream: MediaStream | null;
   setMyStream: Dispatch<SetStateAction<MediaStream | null>>;
   remoteStreams: RemoteStreamT;
@@ -20,6 +22,8 @@ type contextT = {
 };
 
 export const WrtcContext = createContext<contextT>({
+  peerC: null,
+  setPeerC: () => {},
   myStream: null,
   setMyStream: () => {},
   remoteStreams: new Map(),

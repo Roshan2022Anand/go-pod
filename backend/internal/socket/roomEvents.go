@@ -1,34 +1,26 @@
 package socket
 
 import (
-	"encoding/json"
 	"log"
 
-	"github.com/Roshan-anand/go-pod/internal"
+	"github.com/Roshan-anand/go-pod/internal/utils"
 )
 
-// to emit to the given client
-func (c *Client) WsEmit(ev *WsEv) {
-	data, err := json.Marshal(ev)
-	if err != nil {
-		log.Fatal("error while marshalling data:", err)
+// to create a new room
+func (c *Client) createRoom(d *WsData) {
+	name, ok1 := (*d)["name"].(string)
+	email, ok2 := (*d)["email"].(string)
+	studioID, ok3 := (*d)["studioID"].(string)
+	if !ok1 || !ok2 || !ok3 {
+		log.Println("createRoom: missing or invalid fields in data:", d)
 		return
 	}
-
-	c.send <- data
-}
-
-func (c *Client) createRoom(data WsData) {
-
-	name := data["name"]
-	email := data["email"]
-	studioID := data["studioID"]
 
 	c.name = name
 	c.email = email
 
 	//create a new studio
-	id := internal.GenerateID(8)
+	id := utils.GenerateID(8)
 	c.hub.mu.Lock()
 	c.hub.studios[id] = &studio{
 		name: studioID,
@@ -44,19 +36,26 @@ func (c *Client) createRoom(data WsData) {
 			"roomID": id,
 		},
 	}
-	// ws.emit("room:created", { roomID });
+
 	c.WsEmit(rData)
+	// c.WsEmit(&WsEv{
+	// 	Event: "test",
+	// 	Data:  WsData{},
+	// })
 }
 
-func (c *Client) joinRoom(data WsData) {
-	roomID := data["roomID"]
-	name := data["name"]
-	email := data["email"]
+// to join an existing room
+func (c *Client) joinRoom(d *WsData) {
+	roomID := (*d)["roomID"].(string)
+	name := (*d)["name"].(string)
+	email := (*d)["email"].(string)
 
 	c.name = name
 	c.email = email
 
-	rData := &WsEv{}
+	rData := &WsEv{
+		Data: make(WsData),
+	}
 
 	c.hub.mu.Lock()
 	studio, exists := c.hub.studios[roomID]
@@ -64,7 +63,6 @@ func (c *Client) joinRoom(data WsData) {
 		c.hub.mu.Unlock()
 		rData.Event = "error"
 		rData.Data["msg"] = "Room does not exist"
-
 		c.WsEmit(rData)
 		return
 	}
@@ -77,19 +75,21 @@ func (c *Client) joinRoom(data WsData) {
 	c.WsEmit(rData)
 }
 
-func (c *Client) checkRoom(data WsData) {
-	roomID := data["roomID"]
-	studioID := data["studioID"]
+// to check the existence of a room
+func (c *Client) checkRoom(d *WsData) {
+	roomID := (*d)["roomID"].(string)
+	studioID := (*d)["studioID"].(string)
 
 	rData := &WsEv{
 		Event: "room:checked",
+		Data:  make(WsData),
 	}
 
 	c.hub.mu.Lock()
 	studio, exists := c.hub.studios[roomID]
 	if !exists || studio.name != studioID {
-		c.hub.mu.Unlock()
 		rData.Data["exist"] = "false"
+		c.hub.mu.Unlock()
 		c.WsEmit(rData)
 		return
 	}

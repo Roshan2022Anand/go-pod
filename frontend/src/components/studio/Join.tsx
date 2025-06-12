@@ -5,7 +5,7 @@ import Player from "./Player";
 import { Button } from "../ui/button";
 import { SetupMedia } from "./MediaUtils";
 import { useNavigate, useParams, useSearch } from "@tanstack/react-router";
-import { CheckStudioID } from "@/lib/genrator";
+import { CheckStudioID } from "@/lib/utils";
 import { setPodRole, setStudioId } from "@/providers/redux/slice/room";
 import { useDispatch, useSelector } from "react-redux";
 import type { StateT } from "@/providers/redux/store";

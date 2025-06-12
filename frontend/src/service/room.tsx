@@ -5,31 +5,37 @@ import { toast } from "react-toastify";
 import { setPodRole, setRoomId } from "../providers/redux/slice/room";
 import { useNavigate } from "@tanstack/react-router";
 import { useWsContext } from "@/providers/context/socket/config";
-import type { WsData } from "@/lib/Type";
+import type { WsData, wsEvent } from "@/lib/Type";
+import useWrtcService from "./wRTC";
 
 //handles all the room emit and listen event's
 const useRoomService = () => {
+  //hooks
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { email, name } = useSelector((state: StateT) => state.user);
-  const { listeners, wsOn, wsOff, wsEmit, socket } = useWsContext();
+  const { socket, WsEmit } = useWsContext();
+  const { initOffer } = useWrtcService();
 
-  // to listen all the incomming room event's
+  //redux state
+  const { email, name } = useSelector((state: StateT) => state.user);
+
   useEffect(() => {
     if (!socket) return;
-    if (listeners.has("room:created")) return;
 
-    wsOn("room:created", (roomID) => {
+    const created = (data: WsData) => {
+      const { roomID } = data;
       toast.success("Pod created succefully");
       dispatch(setRoomId(roomID));
-    });
+    };
 
-    wsOn("room:joined", (roomID) => {
-      toast.success("Pod created succefully");
+    const joined = (data: WsData) => {
+      const { roomID } = data;
+      toast.success("Pod joined successfully");
       dispatch(setRoomId(roomID));
-    });
+    };
 
-    wsOn("room:checked", (exist) => {
+    const checked = (data: WsData) => {
+      const { exist } = data;
       if (exist) {
         toast.success("you one step closer to join the pod");
         dispatch(setPodRole("guest"));
@@ -37,44 +43,68 @@ const useRoomService = () => {
         toast.error("invalid pod link");
         navigate({ to: "/" });
       }
-    });
-
-    return () => {
-      wsOff("room:created");
-      wsOff("room:joined");
-      wsOff("room:checked");
     };
-  }, [wsOn, wsOff, dispatch, navigate, socket, listeners]);
+
+    const wsMsg = (event: MessageEvent) => {
+      const ev: wsEvent = JSON.parse(event.data);
+      switch (ev.event) {
+        case "room:created":
+          created(ev.data);
+          break;
+        case "room:joined":
+          joined(ev.data);
+          break;
+        case "room:checked":
+          checked(ev.data);
+          break;
+      }
+    };
+
+    socket.addEventListener("message", wsMsg);
+    return () => {
+      socket.removeEventListener("message", wsMsg);
+    };
+  }, [socket]);
 
   //to emit create room
   const create = (studioID: string) => {
     if (!email || !name) return;
-    const payload: WsData = {
-      studioID,
-      email,
-      name,
+    const payload: wsEvent = {
+      event: "create:room",
+      data: {
+        studioID,
+        email,
+        name,
+      },
     };
-    wsEmit("create:room", payload);
+    WsEmit(payload);
+    initOffer();
   };
 
   //to emit join room
   const join = (roomID: string) => {
     if (!email || !name) return;
-    const payload: WsData = {
-      roomID,
-      email,
-      name,
+    const payload: wsEvent = {
+      event: "join:room",
+      data: {
+        roomID,
+        email,
+        name,
+      },
     };
-    wsEmit("join:room", payload);
+    WsEmit(payload);
   };
 
   //to emit check room
   const checkRoom = (roomID: string, studioID: string) => {
-    const payload: WsData = {
-      roomID,
-      studioID,
+    const payload: wsEvent = {
+      event: "check:room",
+      data: {
+        roomID,
+        studioID,
+      },
     };
-    wsEmit("check:room", payload);
+    WsEmit(payload);
   };
 
   return { create, join, checkRoom };

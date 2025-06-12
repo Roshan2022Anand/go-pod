@@ -7,9 +7,10 @@ import (
 	"net/http"
 
 	"github.com/gorilla/websocket"
+	"github.com/pion/webrtc/v4"
 )
 
-type WsData map[string]string
+type WsData map[string]interface{}
 type WsEv struct {
 	Event string `json:"event"`
 	Data  WsData `json:"data"`
@@ -22,6 +23,7 @@ type Client struct {
 	send  chan []byte
 	name  string
 	email string
+	peerC *webrtc.PeerConnection
 }
 
 // it reads the incomming msg from the client
@@ -54,13 +56,15 @@ func (c *Client) readPump() {
 
 		switch evMsg.Event {
 		case "create:room":
-			c.createRoom(evMsg.Data)
+			c.createRoom(&evMsg.Data)
 		case "join:room":
-			c.joinRoom(evMsg.Data)
+			c.joinRoom(&evMsg.Data)
 		case "check:room":
-			c.checkRoom(evMsg.Data)
-		case "test":
-			c.send <- msg
+			c.checkRoom(&evMsg.Data)
+		case "sdp:offer":
+			c.offer(&evMsg.Data)
+		case "ice":
+			c.ice(&evMsg.Data)	
 		default:
 			fmt.Println("other event received:", evMsg.Event)
 		}
@@ -74,21 +78,20 @@ func (c *Client) writePump() {
 	defer func() {
 		c.conn.Close()
 	}()
-
-	//triggers when channel send have new data
 	for {
 		select {
 		case msg, ok := <-c.send:
 			if !ok {
 				c.conn.WriteMessage(websocket.CloseMessage, []byte{})
+				fmt.Println("channel closed, stopping writePump")
 				return
 			}
 
 			w, err := c.conn.NextWriter(websocket.TextMessage)
 			if err != nil {
+				log.Printf("error while getting next writer: %v", err)
 				return
 			}
-			fmt.Println("sending ", string(msg), " to ", c.conn.RemoteAddr())
 			w.Write(msg)
 
 			if err = w.Close(); err != nil {
@@ -99,6 +102,16 @@ func (c *Client) writePump() {
 	}
 }
 
+// to emit to the given client
+func (c *Client) WsEmit(ev *WsEv) {
+    data, err := json.Marshal(ev)
+    if err != nil {
+        log.Fatal("error while marshalling data:", err)
+        return
+    }
+    c.send <- data
+}
+
 // to upgrade the HTTP to Websocket connection
 //
 // upgrader given by gorilla/websocket package
@@ -107,6 +120,7 @@ var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
 		return true
 	},
+	EnableCompression: true,
 }
 
 //warning chage the origin as needed

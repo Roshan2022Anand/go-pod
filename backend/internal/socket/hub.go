@@ -38,6 +38,7 @@ func (h *Hub) Run() {
 		case c := <-h.unregister:
 			h.mu.Lock()
 			delete(h.client, c)
+			c.conn.Close()
 			fmt.Println("client disconnected", c.conn.RemoteAddr())
 			h.mu.Unlock()
 		}

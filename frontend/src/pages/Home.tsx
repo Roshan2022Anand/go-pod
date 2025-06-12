@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { generateStudioID } from "@/lib/genrator";
+import { generateStudioID } from "@/lib/utils";
 import { useNavigate } from "@tanstack/react-router";
 import { useSelector } from "react-redux";
 import type { StateT } from "@/providers/redux/store";

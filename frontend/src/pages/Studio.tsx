@@ -5,27 +5,24 @@ import type { StateT } from "../providers/redux/store";
 import useAuth from "@/hooks/auth";
 import Loading from "@/Loading";
 import { StudioNav } from "@/components/studio/Nav";
-import { useWsContext } from "@/providers/context/socket/config";
+import useSocket from "@/hooks/socket";
+import { useState } from "react";
 
 const Studio = () => {
   useAuth();
 
-  const { socket } = useWsContext();
   const { roomID } = useSelector((state: StateT) => state.room);
   const { name, email } = useSelector((state: StateT) => state.user);
+  const [isConnected, setIsConnected] = useState(false);
 
-  if (!name || !email) return <Loading />;
+  useSocket(setIsConnected);
+
+  if (!email || !name) return <Loading />;
 
   return (
     <main className="bg-bg-prime h-screen flex flex-col">
       <StudioNav />
-      {socket?.readyState === WebSocket.OPEN ? (
-        <>{roomID ? <Pod /> : <Join />}</>
-      ) : (
-        <h3 className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-          Cooking your connection...
-        </h3>
-      )}
+      {isConnected ? <>{roomID ? <Pod /> : <Join />}</> : <Loading />}
     </main>
   );
 };

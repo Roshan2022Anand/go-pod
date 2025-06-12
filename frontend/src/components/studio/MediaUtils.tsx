@@ -19,7 +19,6 @@ const SetupMedia = ({ stream }: { stream: MediaStream }) => {
 
   //to set the new selected audio track
   const handleAudioChange = async (deviceId: string) => {
-    console.log("audio change", deviceId);
     stream.getAudioTracks()[0].stop();
     stream.getAudioTracks()[0].enabled = false;
 
