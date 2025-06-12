@@ -1,20 +1,14 @@
 package socket
 
 import (
-	"log"
-
 	"github.com/Roshan-anand/go-pod/internal/utils"
 )
 
 // to create a new room
 func (c *Client) createRoom(d *WsData) {
-	name, ok1 := (*d)["name"].(string)
-	email, ok2 := (*d)["email"].(string)
-	studioID, ok3 := (*d)["studioID"].(string)
-	if !ok1 || !ok2 || !ok3 {
-		log.Println("createRoom: missing or invalid fields in data:", d)
-		return
-	}
+	name := (*d)["name"]
+	email := (*d)["email"]
+	studioID := (*d)["studioID"]
 
 	c.name = name
 	c.email = email
@@ -46,9 +40,9 @@ func (c *Client) createRoom(d *WsData) {
 
 // to join an existing room
 func (c *Client) joinRoom(d *WsData) {
-	roomID := (*d)["roomID"].(string)
-	name := (*d)["name"].(string)
-	email := (*d)["email"].(string)
+	roomID := (*d)["roomID"]
+	name := (*d)["name"]
+	email := (*d)["email"]
 
 	c.name = name
 	c.email = email
@@ -77,8 +71,8 @@ func (c *Client) joinRoom(d *WsData) {
 
 // to check the existence of a room
 func (c *Client) checkRoom(d *WsData) {
-	roomID := (*d)["roomID"].(string)
-	studioID := (*d)["studioID"].(string)
+	roomID := (*d)["roomID"]
+	studioID := (*d)["studioID"]
 
 	rData := &WsEv{
 		Event: "room:checked",

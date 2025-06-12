@@ -28,13 +28,13 @@ const useWrtcService = () => {
 
       //to send ICE candiate infomation to the connected peer
       peer.onicecandidate = (e) => {
-        const candidate = e.candidate?.candidate;
+        const candidate = e.candidate;
         if (!candidate) return;
 
         WsEmit({
           event: "ice",
           data: {
-            ice: candidate,
+            ice: JSON.stringify(candidate),
           },
         });
       };
@@ -115,12 +115,13 @@ const useWrtcService = () => {
         console.error(`No peer connection found`);
         return;
       }
-
+      console.log("ice received");
       if (candidate) peerC.addIceCandidate(new RTCIceCandidate(candidate));
     };
 
     const wsMsg = (event: MessageEvent) => {
       const ev: wsEvent = JSON.parse(event.data);
+      console.log("wsMsg", ev.event);
       switch (ev.event) {
         case "sdp:answer":
           handleSdp(ev.data);
@@ -134,6 +135,7 @@ const useWrtcService = () => {
     socket.addEventListener("message", wsMsg);
     return () => {
       socket.removeEventListener("message", wsMsg);
+      console.log("clean up");
     };
   }, [socket, peerC]);
 

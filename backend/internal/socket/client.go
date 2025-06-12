@@ -10,7 +10,7 @@ import (
 	"github.com/pion/webrtc/v4"
 )
 
-type WsData map[string]interface{}
+type WsData map[string]string
 type WsEv struct {
 	Event string `json:"event"`
 	Data  WsData `json:"data"`
@@ -64,7 +64,7 @@ func (c *Client) readPump() {
 		case "sdp:offer":
 			c.offer(&evMsg.Data)
 		case "ice":
-			c.ice(&evMsg.Data)	
+			c.ice(&evMsg.Data)
 		default:
 			fmt.Println("other event received:", evMsg.Event)
 		}
@@ -104,12 +104,12 @@ func (c *Client) writePump() {
 
 // to emit to the given client
 func (c *Client) WsEmit(ev *WsEv) {
-    data, err := json.Marshal(ev)
-    if err != nil {
-        log.Fatal("error while marshalling data:", err)
-        return
-    }
-    c.send <- data
+	data, err := json.Marshal(ev)
+	if err != nil {
+		log.Fatal("error while marshalling data:", err)
+		return
+	}
+	c.send <- data
 }
 
 // to upgrade the HTTP to Websocket connection

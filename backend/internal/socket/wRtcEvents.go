@@ -1,6 +1,7 @@
 package socket
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/Roshan-anand/go-pod/internal/utils"
@@ -26,7 +27,7 @@ func (c *Client) offer(d *WsData) {
 		Data:  WsData{},
 	}
 
-	sdp, err := utils.DecompressD((*d)["sdp"].(string)) //decompress the sdp data
+	sdp, err := utils.DecompressD((*d)["sdp"]) //decompress the sdp data
 	if err != nil {
 		fmt.Println("error while decompressing sdp:", err)
 		rErrData.Data["msg"] = "Corrupted sdp data"
@@ -55,12 +56,18 @@ func (c *Client) offer(d *WsData) {
 			fmt.Println("ICE candidate gathering complete")
 			return
 		}
-		ice := i.ToJSON()
 
+		ice, err := json.Marshal(i.ToJSON())
+		if err != nil {
+			fmt.Println("error while marshalling ICE candidate:", err)
+			return
+		}
+
+		fmt.Println("sending ICE to client")
 		c.WsEmit(&WsEv{
 			Event: "ice",
 			Data: WsData{
-				"ice": ice,
+				"ice": string(ice),
 			},
 		})
 	})
@@ -90,6 +97,13 @@ func (c *Client) offer(d *WsData) {
 		c.WsEmit(rErrData)
 		return
 	}
+	err = peerC.SetLocalDescription(ans) //set the local description
+	if err != nil {
+		fmt.Println("error while setting local description:", err)
+		rErrData.Data["msg"] = "Failed to set local description"
+		c.WsEmit(rErrData)
+		return
+	}
 
 	//compress the answer sdp
 	sdp, err = utils.CompressD(&ans.SDP)
@@ -113,16 +127,14 @@ func (c *Client) ice(d *WsData) {
 	c.hub.mu.Lock()
 	defer c.hub.mu.Unlock()
 
-	if c.peerC == nil {
-		fmt.Println("peer connection is nil, cannot add ICE candidate")
-		return
+	ice := (*d)["ice"]
+	var candid webrtc.ICECandidateInit
+	err := json.Unmarshal([]byte(ice), &candid)
+	if err != nil {
+		fmt.Println("error while unmarshalling ICE candidate:", err)
 	}
 
-	ice := (*d)["ice"]
-
-	err := c.peerC.AddICECandidate(webrtc.ICECandidateInit{
-		Candidate: ice.(string),
-	})
+	err = c.peerC.AddICECandidate(candid)
 	if err != nil {
 		fmt.Println("error while adding ICE candidate:", err)
 	}

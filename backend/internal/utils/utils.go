@@ -43,12 +43,16 @@ func DecompressD(data string) (string, error) {
 	return decmpSdp.String(), nil
 }
 
-func CompressD(data *string) (string,error) {
+func CompressD(data *string) (string, error) {
 
 	var buf bytes.Buffer
 
 	wr := gzip.NewWriter(&buf)
 	_, err := wr.Write([]byte(*data))
+
+	wr.Flush()
+	wr.Close()
+
 	if err != nil {
 		return "", err
 	}

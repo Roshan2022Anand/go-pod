@@ -63,8 +63,9 @@ const useRoomService = () => {
     socket.addEventListener("message", wsMsg);
     return () => {
       socket.removeEventListener("message", wsMsg);
+      console.log("clean up");
     };
-  }, [socket]);
+  }, [socket, dispatch, navigate]);
 
   //to emit create room
   const create = (studioID: string) => {
