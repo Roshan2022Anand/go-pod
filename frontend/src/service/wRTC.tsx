@@ -1,8 +1,8 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { toast } from "react-toastify";
 import { useWsContext } from "@/providers/context/socket/config";
 import { useWrtcContext } from "@/providers/context/wRTC/config";
-import type { WsData, wsEvent } from "@/lib/Type";
+import type { WsData } from "@/lib/Type";
 import { compressSdp, decompressSdp } from "@/lib/utils";
 
 //wRTC server configuration
@@ -17,9 +17,11 @@ const rtcConfig = {
 
 //handles all the wRTC emit and listen event's
 const useWrtcService = () => {
-  const { socket, WsEmit } = useWsContext();
+  const { socket, WsEmit, WsOn, WsOff } = useWsContext();
   const { myStream } = useWrtcContext();
   const { peerC, setPeerC } = useWrtcContext();
+
+  const bufferedIce = useRef<RTCIceCandidateInit[]>([]);
 
   //handle RTCpeer events
   const setPeerEv = useCallback(
@@ -96,48 +98,38 @@ const useWrtcService = () => {
   useEffect(() => {
     if (!socket || !peerC) return;
 
-    //to handle incomming SDP information
-    const handleSdp = async (data: WsData) => {
+    WsOn("sdp:answer", async ({ sdp }: WsData) => {
       if (!peerC) return;
-      const sdp = decompressSdp(data.sdp as string);
+
+      const sdpS = decompressSdp(sdp as string);
       await peerC.setRemoteDescription(
         new RTCSessionDescription({
           type: "answer",
-          sdp: sdp,
+          sdp: sdpS,
         })
       );
-    };
 
-    //to handle incomming ICE candidate information
-    const handleIce = (data: WsData) => {
-      const candidate = data.candidate as RTCIceCandidateInit;
-      if (!peerC) {
-        console.error(`No peer connection found`);
-        return;
-      }
-      console.log("ice received");
-      if (candidate) peerC.addIceCandidate(new RTCIceCandidate(candidate));
-    };
+      //adding buffered ICE to the peer
+      bufferedIce.current.forEach((candidate) =>
+        peerC.addIceCandidate(new RTCIceCandidate(candidate))
+      );
+    });
 
-    const wsMsg = (event: MessageEvent) => {
-      const ev: wsEvent = JSON.parse(event.data);
-      console.log("wsMsg", ev.event);
-      switch (ev.event) {
-        case "sdp:answer":
-          handleSdp(ev.data);
-          break;
-        case "ice":
-          handleIce(ev.data);
-          break;
-      }
-    };
+    WsOn("ice", ({ ice }: WsData) => {
+      const candidate = JSON.parse(ice as string) as RTCIceCandidateInit;
+      if (!peerC) return;
 
-    socket.addEventListener("message", wsMsg);
+      //buffering until remote description is set
+      if (peerC.remoteDescription && peerC.remoteDescription.type === "answer")
+        peerC.addIceCandidate(new RTCIceCandidate(candidate));
+      else bufferedIce.current.push(candidate);
+    });
+
     return () => {
-      socket.removeEventListener("message", wsMsg);
-      console.log("clean up");
+      WsOff("sdp:answer");
+      WsOff("ice");
     };
-  }, [socket, peerC]);
+  }, [socket, peerC, WsOn, WsOff]);
 
   return { initOffer };
 };

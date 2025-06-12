@@ -13,7 +13,7 @@ const useRoomService = () => {
   //hooks
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { socket, WsEmit } = useWsContext();
+  const { socket, WsEmit, WsOn, WsOff, listeners } = useWsContext();
   const { initOffer } = useWrtcService();
 
   //redux state
@@ -21,51 +21,36 @@ const useRoomService = () => {
 
   useEffect(() => {
     if (!socket) return;
+    if (listeners.has("room:created")) return;
 
-    const created = (data: WsData) => {
+    WsOn("room:created", (data: WsData) => {
       const { roomID } = data;
-      toast.success("Pod created succefully");
-      dispatch(setRoomId(roomID));
-    };
+      toast.success("Pod created successfully");
+      // dispatch(setRoomId(roomID));
+    });
 
-    const joined = (data: WsData) => {
+    WsOn("room:joined", (data: WsData) => {
       const { roomID } = data;
       toast.success("Pod joined successfully");
       dispatch(setRoomId(roomID));
-    };
+    });
 
-    const checked = (data: WsData) => {
-      const { exist } = data;
-      if (exist) {
-        toast.success("you one step closer to join the pod");
+    WsOn("room:checked", ({ exist }: WsData) => {
+      if (exist === "true") {
+        toast.success("You are one step closer to join the pod");
         dispatch(setPodRole("guest"));
       } else {
-        toast.error("invalid pod link");
+        toast.error("Invalid pod link");
         navigate({ to: "/" });
       }
-    };
+    });
 
-    const wsMsg = (event: MessageEvent) => {
-      const ev: wsEvent = JSON.parse(event.data);
-      switch (ev.event) {
-        case "room:created":
-          created(ev.data);
-          break;
-        case "room:joined":
-          joined(ev.data);
-          break;
-        case "room:checked":
-          checked(ev.data);
-          break;
-      }
-    };
-
-    socket.addEventListener("message", wsMsg);
     return () => {
-      socket.removeEventListener("message", wsMsg);
-      console.log("clean up");
+      WsOff("room:created");
+      WsOff("room:joined");
+      WsOff("room:checked");
     };
-  }, [socket, dispatch, navigate]);
+  }, [socket, WsOn, WsOff, dispatch, navigate, listeners]);
 
   //to emit create room
   const create = (studioID: string) => {
