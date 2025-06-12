@@ -14,6 +14,7 @@ import { FaRecordVinyl } from "react-icons/fa";
 import { FcEndCall } from "react-icons/fc";
 import clsx from "clsx";
 import SideBar from "./SideBar";
+import useWrtcService from "@/service/wRTC";
 
 const Pod = () => {
   const { email, name } = useSelector((state: StateT) => state.user);
@@ -32,6 +33,8 @@ const Pod = () => {
     "grid-cols-7": columns >= 7,
     "grid-cols-8": columns >= 8,
   });
+
+  useWrtcService();
 
   return (
     <main className="grow max-h-[95vh] flex px-2 ">

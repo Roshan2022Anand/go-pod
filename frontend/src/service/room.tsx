@@ -26,7 +26,7 @@ const useRoomService = () => {
     WsOn("room:created", (data: WsData) => {
       const { roomID } = data;
       toast.success("Pod created successfully");
-      // dispatch(setRoomId(roomID));
+      dispatch(setRoomId(roomID));
     });
 
     WsOn("room:joined", (data: WsData) => {

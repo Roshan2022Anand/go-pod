@@ -63,7 +63,6 @@ func (c *Client) offer(d *WsData) {
 			return
 		}
 
-		fmt.Println("sending ICE to client",string(ice))
 		c.WsEmit(&WsEv{
 			Event: "ice",
 			Data: WsData{

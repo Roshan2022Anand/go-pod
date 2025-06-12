@@ -96,7 +96,8 @@ const useWrtcService = () => {
 
   //to listen for wRTC events
   useEffect(() => {
-    if (!socket || !peerC) return;
+    if (!socket) return;
+    console.log("setup");
 
     WsOn("sdp:answer", async ({ sdp }: WsData) => {
       if (!peerC) return;
@@ -128,6 +129,7 @@ const useWrtcService = () => {
     return () => {
       WsOff("sdp:answer");
       WsOff("ice");
+      console.log("clean up");
     };
   }, [socket, peerC, WsOn, WsOff]);
 
