@@ -21,23 +21,23 @@ var config = webrtc.Configuration{
 }
 
 // to handle sdp offer
-func (c *Client) offer(d *WsData) {
-	rErrData := &WsEv{
+func (c *Client) offer(d *WsData[string]) {
+	rErrData := &RwsEv{
 		Event: "error:rtc",
-		Data:  WsData{},
+		Data:  make(WsData[any]),
 	}
 
-	sdp, err := utils.DecompressD((*d)["sdp"]) //decompress the sdp data
+	//decompress the sdp data
+	sdp, err := utils.DecompressD((*d)["sdp"])
 	if err != nil {
 		fmt.Println("error while decompressing sdp:", err)
-		rErrData.Data["msg"] = "Corrupted sdp data"
 		c.WsEmit(rErrData)
 		return
 	}
 
-	peerC, err := webrtc.NewPeerConnection(config) // making a new peer connection
+	// making a new peer connection
+	peerC, err := webrtc.NewPeerConnection(config)
 	if err != nil {
-		rErrData.Data["msg"] = "Failed to create peer connection"
 		c.WsEmit(rErrData)
 		return
 	}
@@ -57,23 +57,26 @@ func (c *Client) offer(d *WsData) {
 			return
 		}
 
-		ice, err := json.Marshal(i.ToJSON())
-		if err != nil {
-			fmt.Println("error while marshalling ICE candidate:", err)
-			return
-		}
-
-		c.WsEmit(&WsEv{
+		ice := i.ToJSON()
+		c.WsEmit(&RwsEv{
 			Event: "ice",
-			Data: WsData{
-				"ice": string(ice),
+			Data: WsData[any]{
+				"ice": ice,
 			},
 		})
 	})
 
 	// handeling incomming tracks
 	peerC.OnTrack(func(track *webrtc.TrackRemote, receiver *webrtc.RTPReceiver) {
-		fmt.Printf("Got remote track: %s, SSRC=%d\n", track.Kind(), track.SSRC())
+		tracks, err := webrtc.NewTrackLocalStaticRTP(track.Codec().RTPCodecCapability, c.email, track.StreamID())
+		if err != nil {
+			fmt.Println("error while creating local track:", err)
+			return
+		}
+		
+		// sendding tracks to the studio tracks channel 
+		// this invokes the c.addTracks() goroutine
+		c.studio.tracks <- tracks 
 	})
 
 	//setting up remote description
@@ -83,7 +86,6 @@ func (c *Client) offer(d *WsData) {
 	})
 	if err != nil {
 		fmt.Println("error while setting remote description:", err)
-		rErrData.Data["msg"] = "Failed to set remote description"
 		c.WsEmit(rErrData)
 		return
 	}
@@ -92,14 +94,12 @@ func (c *Client) offer(d *WsData) {
 	ans, err := peerC.CreateAnswer(nil)
 	if err != nil {
 		fmt.Println("error while creating answer:", err)
-		rErrData.Data["msg"] = "Failed to create answer"
 		c.WsEmit(rErrData)
 		return
 	}
 	err = peerC.SetLocalDescription(ans) //set the local description
 	if err != nil {
 		fmt.Println("error while setting local description:", err)
-		rErrData.Data["msg"] = "Failed to set local description"
 		c.WsEmit(rErrData)
 		return
 	}
@@ -108,21 +108,20 @@ func (c *Client) offer(d *WsData) {
 	sdp, err = utils.CompressD(&ans.SDP)
 	if err != nil {
 		fmt.Println("error while compressing sdp:", err)
-		rErrData.Data["msg"] = "Failed to compress answer sdp"
 		c.WsEmit(rErrData)
 		return
 	}
 
-	c.WsEmit(&WsEv{
+	c.WsEmit(&RwsEv{
 		Event: "sdp:answer",
-		Data: WsData{
+		Data: WsData[any]{
 			"sdp": sdp,
 		},
 	})
 }
 
 // to handle ICE candidates
-func (c *Client) ice(d *WsData) {
+func (c *Client) ice(d *WsData[string]) {
 	c.hub.mu.Lock()
 	defer c.hub.mu.Unlock()
 
@@ -137,4 +136,15 @@ func (c *Client) ice(d *WsData) {
 	if err != nil {
 		fmt.Println("error while adding ICE candidate:", err)
 	}
+}
+
+func (c *Client) addTracks() {
+
+	for {
+		select {
+		case track := <-c.studio.tracks:
+			fmt.Println("new track from", c.email, " trackID:", track.ID())
+		}
+	}
+
 }

@@ -10,15 +10,20 @@ import (
 	"github.com/pion/webrtc/v4"
 )
 
-type WsData map[string]string
+type WsData[T string | any] map[string]T
+type RwsEv struct {
+	Event string      `json:"event"`
+	Data  WsData[any] `json:"data"`
+}
 type WsEv struct {
-	Event string `json:"event"`
-	Data  WsData `json:"data"`
+	Event string         `json:"event"`
+	Data  WsData[string] `json:"data"`
 }
 
 // represents a client
 type Client struct {
 	hub   *Hub
+	studio *studio
 	conn  *websocket.Conn
 	send  chan []byte
 	name  string
@@ -103,7 +108,7 @@ func (c *Client) writePump() {
 }
 
 // to emit to the given client
-func (c *Client) WsEmit(ev *WsEv) {
+func (c *Client) WsEmit(ev *RwsEv) {
 	data, err := json.Marshal(ev)
 	if err != nil {
 		log.Fatal("error while marshalling data:", err)

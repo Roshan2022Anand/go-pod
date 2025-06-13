@@ -6,19 +6,18 @@ import { setPodRole, setRoomId } from "../providers/redux/slice/room";
 import { useNavigate } from "@tanstack/react-router";
 import { useWsContext } from "@/providers/context/socket/config";
 import type { WsData, wsEvent } from "@/lib/Type";
-import useWrtcService from "./wRTC";
 
 //handles all the room emit and listen event's
-const useRoomService = () => {
+const useRoomService = (offer: () => Promise<void>) => {
   //hooks
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { socket, WsEmit, WsOn, WsOff, listeners } = useWsContext();
-  const { initOffer } = useWrtcService();
 
   //redux state
   const { email, name } = useSelector((state: StateT) => state.user);
 
+  //to listen to all room events
   useEffect(() => {
     if (!socket) return;
     if (listeners.has("room:created")) return;
@@ -36,7 +35,7 @@ const useRoomService = () => {
     });
 
     WsOn("room:checked", ({ exist }: WsData) => {
-      if (exist === "true") {
+      if (exist) {
         toast.success("You are one step closer to join the pod");
         dispatch(setPodRole("guest"));
       } else {
@@ -64,7 +63,7 @@ const useRoomService = () => {
       },
     };
     WsEmit(payload);
-    initOffer();
+    offer();
   };
 
   //to emit join room
@@ -79,6 +78,7 @@ const useRoomService = () => {
       },
     };
     WsEmit(payload);
+    offer();
   };
 
   //to emit check room

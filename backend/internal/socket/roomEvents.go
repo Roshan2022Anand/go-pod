@@ -2,10 +2,11 @@ package socket
 
 import (
 	"github.com/Roshan-anand/go-pod/internal/utils"
+	"github.com/pion/webrtc/v4"
 )
 
 // to create a new room
-func (c *Client) createRoom(d *WsData) {
+func (c *Client) createRoom(d *WsData[string]) {
 	name := (*d)["name"]
 	email := (*d)["email"]
 	studioID := (*d)["studioID"]
@@ -16,30 +17,32 @@ func (c *Client) createRoom(d *WsData) {
 	//create a new studio
 	id := utils.GenerateID(8)
 	c.hub.mu.Lock()
-	c.hub.studios[id] = &studio{
+	studio := &studio{
 		name: studioID,
 		clients: map[string]*Client{
 			email: c,
 		},
+		tracks: make(chan *webrtc.TrackLocalStaticRTP),
 	}
+	c.hub.studios[id] = studio
+	c.studio = studio
 	c.hub.mu.Unlock()
 
-	rData := &WsEv{
+	// to run a goroutine to listen for incomming tracks from this client
+	go c.addTracks()
+
+	rData := &RwsEv{
 		Event: "room:created",
-		Data: WsData{
+		Data: map[string]interface{}{
 			"roomID": id,
 		},
 	}
 
 	c.WsEmit(rData)
-	// c.WsEmit(&WsEv{
-	// 	Event: "test",
-	// 	Data:  WsData{},
-	// })
 }
 
 // to join an existing room
-func (c *Client) joinRoom(d *WsData) {
+func (c *Client) joinRoom(d *WsData[string]) {
 	roomID := (*d)["roomID"]
 	name := (*d)["name"]
 	email := (*d)["email"]
@@ -47,8 +50,8 @@ func (c *Client) joinRoom(d *WsData) {
 	c.name = name
 	c.email = email
 
-	rData := &WsEv{
-		Data: make(WsData),
+	rData := &RwsEv{
+		Data: make(WsData[any]),
 	}
 
 	c.hub.mu.Lock()
@@ -56,13 +59,16 @@ func (c *Client) joinRoom(d *WsData) {
 	if !exists {
 		c.hub.mu.Unlock()
 		rData.Event = "error"
-		rData.Data["msg"] = "Room does not exist"
 		c.WsEmit(rData)
 		return
 	}
 
 	studio.clients[email] = c
+	c.studio = studio
 	c.hub.mu.Unlock()
+	
+	// to run a goroutine to listen for incomming tracks from this client
+	go c.addTracks()
 
 	rData.Event = "room:joined"
 	rData.Data["roomID"] = roomID
@@ -70,25 +76,25 @@ func (c *Client) joinRoom(d *WsData) {
 }
 
 // to check the existence of a room
-func (c *Client) checkRoom(d *WsData) {
+func (c *Client) checkRoom(d *WsData[string]) {
 	roomID := (*d)["roomID"]
 	studioID := (*d)["studioID"]
 
-	rData := &WsEv{
+	rData := &RwsEv{
 		Event: "room:checked",
-		Data:  make(WsData),
+		Data:  make(WsData[any]),
 	}
 
 	c.hub.mu.Lock()
 	studio, exists := c.hub.studios[roomID]
 	if !exists || studio.name != studioID {
-		rData.Data["exist"] = "false"
+		rData.Data["exist"] = false
 		c.hub.mu.Unlock()
 		c.WsEmit(rData)
 		return
 	}
 	c.hub.mu.Unlock()
 
-	rData.Data["exist"] = "true"
+	rData.Data["exist"] = true
 	c.WsEmit(rData)
 }

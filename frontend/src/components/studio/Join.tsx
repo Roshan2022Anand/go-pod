@@ -12,7 +12,7 @@ import type { StateT } from "@/providers/redux/store";
 import Loading from "@/Loading";
 import useMedia from "@/hooks/Media";
 
-const Join = () => {
+const Join = ({ offer }: { offer: () => Promise<void> }) => {
   //context call
   const { myStream } = useWrtcContext();
 
@@ -23,7 +23,7 @@ const Join = () => {
   //hooks call
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { create, join, checkRoom } = useRoomService();
+  const { create, join, checkRoom } = useRoomService(offer);
   const { getMedia } = useMedia();
 
   //to validate client's authorization in the pod
