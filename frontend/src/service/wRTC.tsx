@@ -20,8 +20,7 @@ const rtcConfig = {
 //handles all the wRTC emit and listen event's
 const useWrtcService = () => {
   const dispatch = useDispatch();
-  const { socket, WsEmit, WsOn, WsOff, listeners } = useWsContext();
-  const { myStream } = useWrtcContext();
+  const { WsEmit, WsOn, WsOff, listeners } = useWsContext();
   const { peerC, setPeerC } = useWrtcContext();
 
   const bufferedIce = useRef<RTCIceCandidateInit[]>([]);
@@ -29,8 +28,6 @@ const useWrtcService = () => {
   //handle RTCpeer events
   const setPeerEv = useCallback(
     (peer: RTCPeerConnection) => {
-      if (!socket) return;
-
       //to send ICE candiate infomation to the connected peer
       peer.onicecandidate = (e) => {
         const candidate = e.candidate;
@@ -45,21 +42,14 @@ const useWrtcService = () => {
       };
 
       //to track media streams of the connected peer
-      //   peer.ontrack = (e) => {
-      //     const stream = e.streams[0];
-      //     setRemoteStreams((prev) => {
-      //       prev.set(email, stream);
-      //       return new Map(prev);
-      //     });
-      //   };
-
-      //to send user's media stream to the connected peer
-      if (myStream) {
-        myStream.getTracks().forEach((track) => {
-          console.log("sending track");
-          peer.addTrack(track, myStream);
-        });
-      }
+      peer.ontrack = (e) => {
+        const stream = e.streams[0];
+        console.log("received track from", stream.id);
+        // setRemoteStreams((prev) => {
+        //   prev.set(email, stream);
+        //   return new Map(prev);
+        // });
+      };
 
       //to handle peer disconnection
       peer.onconnectionstatechange = () => {
@@ -75,19 +65,18 @@ const useWrtcService = () => {
         toast.error(` disconnected from the room`);
       };
     },
-    [myStream, socket, WsEmit, setPeerC]
+    [WsEmit, setPeerC]
   );
 
   //to initialize wRTC connection offer to the joined client
   const initOffer = async () => {
-    if (!socket) return;
     const peer = new RTCPeerConnection(rtcConfig);
+    setPeerC(peer);
     setPeerEv(peer);
 
     //create offer and send it to the server
     const sdp = await peer.createOffer();
     await peer.setLocalDescription(new RTCSessionDescription(sdp));
-    setPeerC(peer);
     const zipSdp = compressSdp(sdp.sdp as string); //compressed to reduce bandwidth usage
     WsEmit({
       event: "sdp:offer",
@@ -99,7 +88,6 @@ const useWrtcService = () => {
 
   //to listen for wRTC events
   useEffect(() => {
-    if (!socket) return;
     if (listeners.has("sdp:answer")) return;
     console.log("setup");
 
@@ -140,7 +128,7 @@ const useWrtcService = () => {
       WsOff("ice");
       console.log("clean up");
     };
-  }, [socket, peerC, WsOn, WsOff, listeners, dispatch]);
+  }, [peerC, WsOn, WsOff, listeners, dispatch]);
 
   return { initOffer };
 };

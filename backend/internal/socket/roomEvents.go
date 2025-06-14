@@ -18,18 +18,17 @@ func (c *Client) createRoom(d *WsData[string]) {
 	id := utils.GenerateID(8)
 	c.hub.mu.Lock()
 	studio := &studio{
-		name: studioID,
+		name:   studioID,
+		roomID: id,
+		tracks: Tracks{},
 		clients: map[string]*Client{
 			email: c,
 		},
-		tracks: make(chan *webrtc.TrackLocalStaticRTP),
+		sendTrack: make(chan *webrtc.TrackLocalStaticRTP),
 	}
 	c.hub.studios[id] = studio
 	c.studio = studio
 	c.hub.mu.Unlock()
-
-	// to run a goroutine to listen for incomming tracks from this client
-	go c.addTracks()
 
 	rData := &RwsEv{
 		Event: "room:created",
@@ -66,9 +65,6 @@ func (c *Client) joinRoom(d *WsData[string]) {
 	studio.clients[email] = c
 	c.studio = studio
 	c.hub.mu.Unlock()
-	
-	// to run a goroutine to listen for incomming tracks from this client
-	go c.addTracks()
 
 	rData.Event = "room:joined"
 	rData.Data["roomID"] = roomID

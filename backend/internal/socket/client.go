@@ -22,13 +22,14 @@ type WsEv struct {
 
 // represents a client
 type Client struct {
-	hub   *Hub
-	studio *studio
-	conn  *websocket.Conn
-	send  chan []byte
-	name  string
-	email string
-	peerC *webrtc.PeerConnection
+	hub      *Hub
+	studio   *studio
+	conn     *websocket.Conn
+	sendMsg  chan []byte
+	sendProp chan *Propose
+	name     string
+	email    string
+	peerC    *webrtc.PeerConnection
 }
 
 // it reads the incomming msg from the client
@@ -70,6 +71,8 @@ func (c *Client) readPump() {
 			c.offer(&evMsg.Data)
 		case "ice":
 			c.ice(&evMsg.Data)
+		case "proposal":
+			c.rtcProposal(&evMsg.Data)
 		default:
 			fmt.Println("other event received:", evMsg.Event)
 		}
@@ -83,26 +86,17 @@ func (c *Client) writePump() {
 	defer func() {
 		c.conn.Close()
 	}()
-	for {
-		select {
-		case msg, ok := <-c.send:
-			if !ok {
-				c.conn.WriteMessage(websocket.CloseMessage, []byte{})
-				fmt.Println("channel closed, stopping writePump")
-				return
-			}
+	for msg := range c.sendMsg {
+		w, err := c.conn.NextWriter(websocket.TextMessage)
+		if err != nil {
+			log.Printf("error while getting next writer: %v", err)
+			return
+		}
+		w.Write(msg)
 
-			w, err := c.conn.NextWriter(websocket.TextMessage)
-			if err != nil {
-				log.Printf("error while getting next writer: %v", err)
-				return
-			}
-			w.Write(msg)
-
-			if err = w.Close(); err != nil {
-				log.Printf("error while closing writer: %v", err)
-				return
-			}
+		if err = w.Close(); err != nil {
+			log.Printf("error while closing writer: %v", err)
+			return
 		}
 	}
 }
@@ -114,7 +108,7 @@ func (c *Client) WsEmit(ev *RwsEv) {
 		log.Fatal("error while marshalling data:", err)
 		return
 	}
-	c.send <- data
+	c.sendMsg <- data
 }
 
 // to upgrade the HTTP to Websocket connection
@@ -137,7 +131,7 @@ func ServerWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		return
 	}
-	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256)}
+	client := &Client{hub: hub, conn: conn, sendMsg: make(chan []byte, 256), sendProp: make(chan *Propose)}
 	client.hub.register <- client
 
 	go client.writePump()

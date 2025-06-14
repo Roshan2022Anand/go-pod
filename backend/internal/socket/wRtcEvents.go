@@ -2,7 +2,9 @@ package socket
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
 
 	"github.com/Roshan-anand/go-pod/internal/utils"
 	"github.com/pion/webrtc/v4"
@@ -67,16 +69,32 @@ func (c *Client) offer(d *WsData[string]) {
 	})
 
 	// handeling incomming tracks
-	peerC.OnTrack(func(track *webrtc.TrackRemote, receiver *webrtc.RTPReceiver) {
-		tracks, err := webrtc.NewTrackLocalStaticRTP(track.Codec().RTPCodecCapability, c.email, track.StreamID())
+	peerC.OnTrack(func(t *webrtc.TrackRemote, r *webrtc.RTPReceiver) {
+		tracks, err := webrtc.NewTrackLocalStaticRTP(t.Codec().RTPCodecCapability, c.email, t.StreamID())
 		if err != nil {
 			fmt.Println("error while creating local track:", err)
 			return
 		}
-		
-		// sendding tracks to the studio tracks channel 
+
+		// sendding tracks to the studio sendTrack channel
 		// this invokes the c.addTracks() goroutine
-		c.studio.tracks <- tracks 
+		c.studio.sendTrack <- tracks
+
+		go c.addTracks(tracks) // to add tracks to global
+
+		buf := make([]byte, 1400)
+		for {
+			i, _, err := t.Read(buf)
+			if err != nil {
+				fmt.Println("error while reading track:", err)
+				return
+			}
+			if _, err = tracks.Write(buf[:i]); err != nil && !errors.Is(err, io.ErrClosedPipe) {
+				fmt.Println("error while writing track:", err)
+				return
+			}
+
+		}
 	})
 
 	//setting up remote description
@@ -122,9 +140,6 @@ func (c *Client) offer(d *WsData[string]) {
 
 // to handle ICE candidates
 func (c *Client) ice(d *WsData[string]) {
-	c.hub.mu.Lock()
-	defer c.hub.mu.Unlock()
-
 	ice := (*d)["ice"]
 	var candid webrtc.ICECandidateInit
 	err := json.Unmarshal([]byte(ice), &candid)
@@ -138,13 +153,39 @@ func (c *Client) ice(d *WsData[string]) {
 	}
 }
 
-func (c *Client) addTracks() {
+// to handle proposal from the client tracks
+func (c *Client) rtcProposal(d *WsData[string]) {
+	id := (*d)["id"]
+	kind := (*d)["kind"]
 
-	for {
-		select {
-		case track := <-c.studio.tracks:
-			fmt.Println("new track from", c.email, " trackID:", track.ID())
-		}
+	c.sendProp <- &Propose{
+		id:    id,
+		Email: c.email,
+		prop:  kind,
+		Track: nil,
 	}
-
 }
+
+func (c *Client) addTracks(t *webrtc.TrackLocalStaticRTP) {
+	prop := <-c.sendProp
+	prop.Track = t
+	c.studio.tracks[prop.id] = prop
+}
+
+// to send new client's tracks to all other connected clients in the studio
+func (s *studio) snedTracksToOldClients() {
+	for track := range s.sendTrack {
+		fmt.Println("new track received from client:", track.ID(), track.Kind())
+
+		// add the track to all other clients in the studio
+		// for email, c := range s.clients {
+		// 	if email != track.ID() {
+		// 		fmt.Println("sending peer", email)
+		// 		c.peerC.AddTrack(track)
+		// 	}
+		// }
+	}
+}
+
+// to send all connected client's tracks to the new client
+func (c *Client) sendTracksToNewClient() {}
